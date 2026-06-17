@@ -1,0 +1,8 @@
+# macOS
+.DS_Store
+
+# Large binary course source materials (kept locally only)
+课程资料/
+
+# Temporary working files (contact sheets, rendered, scorm, pdfs)
+tmp/
