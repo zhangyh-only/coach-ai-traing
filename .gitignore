@@ -11,4 +11,5 @@ tmp/
 .obsidian/
 
 # Large intermediate extraction artifacts (rendered pages/slides, reproducible via extract script)
-output_v2/extracted/
+# 用 **/ 以兼容任意父目录(如 知识库搭建/output_v2/extracted/)
+**/output_v2/extracted/
