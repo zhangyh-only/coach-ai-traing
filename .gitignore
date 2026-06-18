@@ -6,3 +6,9 @@
 
 # Temporary working files (contact sheets, rendered, scorm, pdfs)
 tmp/
+
+# Editor config
+.obsidian/
+
+# Large intermediate extraction artifacts (rendered pages/slides, reproducible via extract script)
+output_v2/extracted/
