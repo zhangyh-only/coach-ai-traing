@@ -1,0 +1,27 @@
+# A 桶零成本格式地基：统一编辑器/工具的格式行为，避免无谓的 diff 噪音。
+# 无需运行、无需依赖，编辑器原生支持即可生效。
+# root = true   # 若本目录确是仓库根,取消注释以截断向上查找;嵌套在更大仓库里则保持注释,继承父 .editorconfig（避免切断父链）
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+# 前端/配置类生态约定 2 空格缩进
+[*.{js,ts,jsx,tsx,vue,json,yml,yaml,html,css,scss}]
+indent_size = 2
+
+# Go 官方风格：tab 缩进
+[*.go]
+indent_style = tab
+
+# Markdown：行尾空格可能表示硬换行，保留
+[*.md]
+trim_trailing_whitespace = false
+
+# Makefile：语法要求 tab 缩进
+[Makefile]
+indent_style = tab

@@ -13,3 +13,8 @@ tmp/
 # Large intermediate extraction artifacts (rendered pages/slides, reproducible via extract script)
 # 用 **/ 以兼容任意父目录(如 知识库搭建/output_v2/extracted/)
 **/output_v2/extracted/
+
+# rig 工作流本地产物（安装报告 / 备份；与 .claude/protected-paths.txt 同源，见 rig manifest）
+.rig/
+*.bak
+**/install-report.json
