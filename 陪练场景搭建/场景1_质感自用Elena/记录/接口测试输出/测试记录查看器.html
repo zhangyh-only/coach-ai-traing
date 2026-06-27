@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Coach 角色扮演链 · 测试记录查看器</title>
+<style>
+:root{--bg:#faf7f3;--card:#fff;--ink:#2b2622;--mut:#8a7f76;--line:#ece4da;--caramel:#a9653b;
+--sa:#eef1f4;--elena:#fbeee2;--red:#c0392b;--redbg:#fdecea;--green:#3d8b5f;--grey:#9a8f86;--state:#f3ede6;}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+background:var(--bg);color:var(--ink);font-size:15px;line-height:1.65}
+.wrap{max-width:980px;margin:0 auto;padding:24px 18px 80px}
+h1{font-size:22px;margin:0 0 4px}.sub{color:var(--mut);font-size:13px;margin-bottom:16px}
+.note{font-size:12px;color:var(--mut);background:#fff8f0;border:1px solid #f0e0cc;border-radius:8px;padding:9px 12px;margin-bottom:16px}
+.empty{background:#fff;border:1px dashed var(--line);border-radius:12px;padding:40px;text-align:center;color:var(--mut)}
+.stats{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 14px;min-width:84px}
+.stat .n{font-size:19px;font-weight:700;color:var(--caramel)}.stat .l{font-size:12px;color:var(--mut)}
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.chip{border:1px solid var(--line);background:var(--card);border-radius:20px;padding:5px 13px;font-size:13px;cursor:pointer;user-select:none}
+.chip.on{background:var(--caramel);color:#fff;border-color:var(--caramel)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:16px}
+.chead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.badge{font-size:12px;font-weight:700;color:#fff;border-radius:6px;padding:2px 9px}
+.A{background:#3b7aa9}.B{background:#8a6db0}.C{background:#7a8a93}.D{background:#c0683a}.q{background:#bbb}
+.rid{font-size:12px;color:var(--mut)}
+.verdict{font-size:12px;font-weight:700;border-radius:6px;padding:2px 9px}
+.v-bad{background:var(--redbg);color:var(--red)}.v-ok{background:#e8f5ee;color:var(--green)}.v-na{background:#eee;color:var(--grey)}
+.prod{font-size:13px;color:var(--mut);margin:2px 0 6px}
+.persona details{font-size:12px;color:var(--mut);background:#f7f2ec;border-radius:8px;padding:6px 10px;margin-bottom:10px}
+.persona summary{cursor:pointer}
+.ana{background:#fff6f5;border:1px solid #f3d6d2;border-radius:10px;padding:9px 12px;margin-bottom:12px;font-size:13px}
+.ana b{color:var(--red)}
+.turn{margin:9px 0}.role{font-size:11px;color:var(--mut);margin-bottom:2px}
+.bubble{border-radius:12px;padding:9px 13px;display:inline-block;max-width:90%;white-space:pre-wrap}
+.sa .bubble{background:var(--sa)}.elena{text-align:right}.elena .bubble{background:var(--elena);text-align:left}
+.narr{color:#b3a59c;font-style:italic;font-size:13px}
+.state{font-size:11px;color:var(--mut);background:var(--state);border-radius:6px;padding:1px 7px;margin-top:3px;display:inline-block}
+.has{outline:2px solid #eebbb6;outline-offset:2px;border-radius:12px}
+.itag{display:inline-block;border-radius:6px;font-size:11px;padding:1px 7px;margin:3px 4px 0 0}
+.man{background:var(--redbg);color:var(--red);border:1px solid #f0c4c2}
+.aut{background:#f0ede9;color:var(--grey);border:1px solid #e3ddd5}
+</style>
+</head>
+<body><div class="wrap">
+<h1>Coach 角色扮演链 · 测试记录查看器</h1>
+<div class="sub" id="sub">加载中…</div>
+<div class="note">这是<b>固定查看器</b>：自动读取 <code>records.js</code> 里的<b>全部</b>测试记录动态展示。新测试只增 session JSON、刷新数据后回到本页刷新即见——不再每次生成新 HTML。卡片里红色是<b>人工分析</b>结论（权威），灰色小标是<b>规则初筛</b>（仅辅助导航，有误报）。每轮 Elena 下方灰底是模型的 <code>&lt;?STATE&gt;</code> 本轮盘点。</div>
+<div id="stats" class="stats"></div>
+<div id="filters" class="filters"></div>
+<div id="cards"></div>
+</div>
+<script src="records.js"></script>
+<script>
+function esc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+var DATA = window.RECORDS || null;
+var META = window.RECORDS_META || null;
+var F = {persona:null, onlyIssue:false};
+
+function renderStats(){
+  if(!META) return;
+  var p=META.byPersona||{A:0,B:0,C:0,D:0};
+  document.getElementById('stats').innerHTML =
+    stat(META.total,'总局数 (显示 <span id="shown">'+META.total+'</span>)')
+    + stat(META.issueSessions,'有问题的局')
+    + stat(p.A+'/'+p.B+'/'+p.C+'/'+p.D,'A/B/C/D 性子分布');
+}
+function stat(n,l){return '<div class="stat"><div class="n">'+n+'</div><div class="l">'+l+'</div></div>';}
+
+function renderFilters(){
+  var box=document.getElementById('filters');
+  var defs=[['A','A 理性'],['B','B 比价'],['C','C 冷淡'],['D','D 心动']];
+  var h='';
+  defs.forEach(function(d){h+='<span class="chip" data-p="'+d[0]+'">'+d[1]+'</span>';});
+  h+='<span class="chip" id="onlyIssue">只看有问题的</span>';
+  box.innerHTML=h;
+  box.querySelectorAll('.chip[data-p]').forEach(function(el){
+    el.onclick=function(){
+      var p=el.dataset.p;
+      if(F.persona===p){F.persona=null;el.classList.remove('on');}
+      else{box.querySelectorAll('.chip[data-p]').forEach(function(x){x.classList.remove('on');});F.persona=p;el.classList.add('on');}
+      render();
+    };
+  });
+  document.getElementById('onlyIssue').onclick=function(){
+    F.onlyIssue=!F.onlyIssue;this.classList.toggle('on',F.onlyIssue);render();
+  };
+}
+
+function render(){
+  var box=document.getElementById('cards');box.innerHTML='';var shown=0;
+  (DATA||[]).forEach(function(s){
+    if(F.persona && s.persona_code!==F.persona) return;
+    if(F.onlyIssue && !s.has_problem) return;
+    shown++;
+    var a=s.analysis||{};
+    var pc=(s.persona_code==='?')?'q':s.persona_code;
+    var vcls=s.analyzed?(s.has_problem?'v-bad':'v-ok'):'v-na';
+    var vtxt=s.analyzed?(a.verdict||(s.has_problem?'有问题':'无问题')):'未分析';
+    var h='<div class="chead"><span class="badge '+pc+'">'+s.persona_code+' '+s.persona_name+'</span>'
+        +'<span class="rid">recordId='+s.recordId+' · '+(s.timestamp||'')+'</span>'
+        +'<span class="verdict '+vcls+'">'+esc(vtxt)+'</span></div>';
+    h+='<div class="prod">🛍 '+esc(s.product||'(未取到)')+'</div>';
+    if(s.personality) h+='<div class="persona"><details><summary>本局性子</summary>'+esc(s.personality)+'</details></div>';
+    if(a.issues && a.issues.length){
+      h+='<div class="ana"><b>人工分析问题：</b>';
+      a.issues.forEach(function(it){h+='<div>· 第'+it.loop+'轮 ['+esc(it.type||'')+'] '+esc(it.detail||'')+'</div>';});
+      h+='</div>';
+    }
+    (s.turns||[]).forEach(function(t){
+      h+='<div class="turn sa"><div class="role">SA · 第'+t.loop+'轮</div><div class="bubble">'+esc(t.sa)+'</div></div>';
+      var hi=((t.manual&&t.manual.length)||(t.auto&&t.auto.length))?' has':'';
+      var eb=(t.elena_narr||[]).map(function(n){return '<span class="narr">'+esc(n)+'</span>';}).join(' ');
+      if(t.elena_core) eb+=(eb?'<br>':'')+esc(t.elena_core);
+      h+='<div class="turn elena"><div class="role">Elena · 第'+t.loop+'轮</div><div class="bubble'+hi+'">'+(eb||'(空)')+'</div>';
+      if(t.state) h+='<div><span class="state">&lt;?STATE '+esc(t.state)+'&gt;</span></div>';
+      var tags='';
+      (t.manual||[]).forEach(function(it){tags+='<span class="itag man">'+esc(it[0])+'：'+esc(it[1])+'</span>';});
+      (t.auto||[]).forEach(function(it){tags+='<span class="itag aut">'+esc(it[0])+'：'+esc(it[1])+'</span>';});
+      if(tags) h+='<div>'+tags+'</div>';
+      h+='</div>';
+    });
+    var c=document.createElement('div');c.className='card';c.innerHTML=h;box.appendChild(c);
+  });
+  var sh=document.getElementById('shown');if(sh)sh.textContent=shown;
+}
+
+if(!DATA){
+  document.getElementById('sub').textContent='还没有测试记录';
+  document.getElementById('cards').innerHTML='<div class="empty">还没有数据。<br>先跑测试（python3 scripts/roleplay_api_test.py begin / step …），<br>再 python3 scripts/build_report.py 刷新 records.js，然后刷新本页。</div>';
+}else{
+  document.getElementById('sub').textContent='数据来自 records.js ｜ 共 '+((META&&META.total)||DATA.length)+' 局';
+  renderStats();renderFilters();render();
+}
+</script>
+</body>
+</html>

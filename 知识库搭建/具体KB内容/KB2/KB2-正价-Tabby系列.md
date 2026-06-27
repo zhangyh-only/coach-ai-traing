@@ -2,9 +2,9 @@
 
 文档编号：KB2-正价-Tabby系列
 所属知识库：KB2 产品知识
-版本：v1.0
-更新日期：2026-06-18
-数据来源：3361_Coach 明星产品系列-Tabby FY26.pdf；新场景要求及辅助资料整理（业务老师·门店缩写与颜色词典 F节，作产品参考词典补充）
+版本：v1.1
+更新日期：2026-06-26
+数据来源：3361_Coach 明星产品系列-Tabby FY26.pdf；新场景要求及辅助资料整理（业务老师·门店缩写与颜色词典 F节，作产品参考词典补充）；coach产品-tabby.xlsx（业务·Tabby 产品列表，44 款逐款编号/材质/尺寸/价格，2026-06）
 
 ---
 
@@ -18,7 +18,7 @@ Tabby 是 Coach 最具代表性的标志性手袋系列之一，被定位为"现
 | 品类 | 包袋（含手袋、肩背包、背包、Top Handle 等款型） |
 | 渠道 | 正价（Retail），Tabby 为正价明星系列 |
 | 系列 | Tabby 家族（含 11 个主题子系列，见下） |
-| 价位带 | 【待客户补充】（课程未提供价格，以门店主数据为准） |
+| 价位带 | ¥3650–7950（按业务产品列表 44 款标价区间）；以上为产品标价，实时库存与促销价以门店系统为准 |
 | 皮质/材质 | 基础皮革 Soft Grain Leather（柔软颗粒纹皮革，经典牛皮）；子系列另含丹宁、羊毛针织提花、手套鞣皮、光面小牛皮等 |
 | 容量/尺寸 | 多尺寸（门店缩写如 Tabby 20/26、Chain Tabby 26/30/35 等，详见下）；精确 cm 尺寸【待客户补充】 |
 | 核心卖点 | 现代经典手袋；不同皮革 + 丰富尺寸，每位顾客都能找到适合自己的选择；每件作品独一无二 |
@@ -46,6 +46,56 @@ Tabby 是 Coach 最具代表性的标志性手袋系列之一，被定位为"现
 | **SOFT TABBY BAG** | 2025 春季改头换面，正面翻盖重新设计，搭配 Chain Tabby 方向 | 保留皮革包式与立体 Bombé 皮革凸饰边 | 【待客户补充】 | — | CAM88 SMOOTH CALF LEATHER SOFT TABBY BAG |
 | **MONOCHROME TABBY** | "粉笔色时代"：所有细节（缝线/金属/皮牌）均粉笔白同色系 | 染色烫配金属配件 | 【待客户补充】 | **护理提示：染色烫配金属配件容易刮伤，持用时格外小心** | MONOCHROME GLOVETANNED TABBY SHOULDER BAG 26 |
 | **KNIT SOFT TABBY** | 超大 Signature C 针织图案（时装秀灵感）；Stuart Vevers 背书 | **72% 羊毛 + 聚酯纤维混纺提花织物，Bouclé 纱线**，柔软蓬松触感 | 与真皮 Tabby Shoulder Bag 相同立体设计 | **护理：只能干洗！** | KNIT SOFT TABBY SHOULDER BAG |
+
+### 逐款 SKU 明细表（业务·产品列表 coach产品-tabby.xlsx，44 款）
+> 来源：业务提供《coach产品-tabby.xlsx》「产品列表」（44 款 Tabby 全家族）。**价格为产品标价**（实时库存 / 促销以门店系统为准）；「核心特性」按原表精简为关键短语、不增删事实；Excel 留空处标「—」、不臆补；原表编号有重复（序号 27 与 44 同为 CU076）如实保留。本表可作"逐款编号 / 材质 / 尺寸 / 价格"主检索，款式叙事见上方子系列要素表。
+
+| 序号 | 名称 | 产品编号 | 核心特性（精简） | 材质 | 尺寸 | 价格(¥) |
+|------|------|----------|------------------|------|------|---------|
+| 1 | SKETCH PRINT TABBY SHOULDER BAG | CBA26 | 涂鸦印花、主题图案、个人化风格 | 未明确 | 26 | 4750 |
+| 2 | SOFT GRAIN LEATHER CHAIN TABBY SHOULDER BAG | CY919 | 链条款、立体C金属扣、磁吸翻盖、三条可拆肩带（含链条）、可拆挂饰 | 柔软颗粒纹皮革（轻质牛皮） | 容小型 iPad | 4750 |
+| 3 | SOFT GRAIN LEATHER CHAIN TABBY SHOULDER BAG | CY920 | 同 CY919 设计、三条可拆肩带、可拆挂饰 | 柔软颗粒纹皮革 | 30，容中型 iPad | 5250 |
+| 4 | SOFT GRAIN LEATHER CHAIN TABBY SHOULDER BAG | CY921 | 同系列、侧重大容量、可拆挂饰 | 柔软颗粒纹皮革 | 35，容 13 寸笔记本 | 5950 |
+| 5 | QUILTED WASHED LEATHER TIMES SQUARE TABBY | CW628 | 复古绗缝、水洗皮使用感、纽约主题 | 水洗绵羊皮革 | 16、17 | 4500 |
+| 6 | QUILTED WASHED LEATHER TIMES SQUARE TABBY | CW629 | 纽约元素（I♥NY马克杯/出租车）、复古绗缝水洗 | 水洗皮革 | 26 | 5600 |
+| 7 | QUILTED DENIM TABBY SHOULDER BAG | CAM92 | 休闲、多种水洗色调、绗缝丹宁 | 丹宁面料 | 26（部分款） | 5600 |
+| 8 | QUILTED PATCHWORK DENIM TABBY SHOULDER BAG | CAM91 | 旧丹宁拼贴、二手衣物/环保灵感 | 拼接丹宁面料 | 26 | 5600 |
+| 9 | WESTERN TABBY SHOULDER BAG | CT721 | 西部风、银色五金、对比明缝线、马鞍扣环、工装侧袋 | 纯正颗粒纹皮革 | 未明确 | 5950 |
+| 10 | CRYSTAL TABBY SHOULDER BAG | CW591 | 加宽包型、加长肩带、皮革与五金镶水晶、造型华丽 | 未明确 | 28 | 5600 |
+| 11 | REFINED CALF LEATHER TABBY SHOULDER BAG WITH PAVE C | CW604 | 同 CW591 包型、镶水晶装饰 | 精制小牛皮 | 28 | 5250 |
+| 12 | TWISTED TABBY SHOULDER BAG | CAN26 | 不对称包型、扭曲C金属扣、超现实灵感 | 手套鞣制皮革（GLOVETANNED） | 未明确 | 4950 |
+| 13 | SMOOTH CALF LEATHER SOFT TABBY BAG | CAM98 | 重设计正面翻盖、顶部缝线+边缘上色（移除皮革包边） | 光滑小牛皮 | 未明确 | 4950 |
+| 14 | MONOCHROME GLOVETANNED TABBY SHOULDER BAG | CAM84 | 全粉笔白（缝线/五金/皮牌同色）、渐层色调 | 手套鞣制皮革 | 26 | 5250 |
+| 15 | QUILTED SUEDE TABBY SHOULDER BAG WITH CHAIN | CW620 | 西部趋势、麂皮纹理鲜明柔软、链条 | 麂皮（意大利制） | 26 | 5250 |
+| 16 | SPAZZOLATO LEATHER TABBY SHOULDER BAG | CW631 | 双色调明暗、部分光泽部分低调 | Spazzolato 皮革（全颗粒纹、不易留指纹） | 26 | 4550 |
+| 17 | QUILTED METALLIC TABBY SHOULDER BAG WITH CHAIN | CW594 | 青灰褶皱金属感、渐层五金、链条 | 褶皱金属皮革（金属箔涂层） | 26 | 6250 |
+| 18 | QUILTED METALLIC TABBY SHOULDER BAG WITH CHAIN | CW596 | 同系列褶皱金属皮革 | 褶皱金属皮革 | 20 | 4950 |
+| 19 | POLISHED PEBBLE LEATHER TABBY SHOULDER BAG | CY201 | 保留原版核心细节、更长肩带更舒适 | 抛光鹅卵石纹皮革 | 20 | 3650 |
+| 20 | QUILTED TIE-DYE TABBY SHOULDER BAG WITH CHAIN | CU080 | 手工绑扎+染色扎染、每款独一无二、绗缝、链条 | Nappa 羊羔皮革 | 20 | 4950 |
+| 21 | QUILTED TIE-DYE TABBY SHOULDER BAG | CU084 | 同 CU080 扎染工艺、手工制作 | Nappa 羊羔皮革 | 26 | 7250 |
+| 22 | CARGO TURNLOCK SOFT TABBY | CU124 | 工装灵感、铆钉、对比顶部缝线、抛光银五金、多插槽 | 软质面料（推测） | 未明确 | 5950 |
+| 23 | TABBY SHOULDER BAG 20 | CP149 | 绗缝羊皮软糯、链条肩带可变背法、整面皮革侧身、卡扣替代磁吸 | 绗缝羊皮 | 20 | 4950 |
+| 24 | TABBY SHOULDER BAG 26 | CP150 | — | — | 26 | 5959 |
+| 25 | TABBY SHOULDER BAG 26 | CI032 | 1970经典、挺阔长方形、可手提、可拆皮质肩带+斜背带、外部插袋、侧面锥形可展、明缝线 | 未明确 | 26 | 4550 |
+| 26 | TABBY TOP HANDLE | CCC12 | 绗缝 Nappa、内外插层、可拆斜背链条 | 绗缝 Nappa 皮革 | 未明确 | 4550 |
+| 27 | TABBY BACKPACK | CU076 | 可转斜背手袋、90年代趋势、抛光黄铜超大扣眼、包裹皮革 Signature C 闭合 | 超柔软 Nappa 皮革 | 未明确 | 5250 |
+| 28 | CHAIN TABBY SHOULDER BAG | CAF55 | 现代重塑1970、转鼓柔软皮革奢华亮泽、绗缝、内置多功能口袋+外置拉链袋、三条可拆肩带 | 牛皮革 | 26 | 5650 |
+| 29 | TABBY SHOULDER BAG 26 | CCW83 | 保留原款设计特色与工艺细节 | 柔软颗粒纹皮革 | 26 | 5250 |
+| 30 | TABBY SHOULDER BAG 26 | CCX04 | 经典全新核心版、极柔软颗粒纹、慵懒自然、保留原版特色 | 轻盈牛皮（颗粒纹、缎面光泽、每件独一无二） | 26 | 4500 |
+| 31 | TABBY SHOULDER BAG 26 | CDQ13 | 现代重塑1970、多种趣味挂件、外置拉链袋、两条可拆肩带 | 天然粒面牛皮革 | 26 | 7950 |
+| 32 | TABBY SHOULDER BAG 26 | CCW86 | 刺绣佩斯利印花、抛光饰钉 | 刺绣 | 26 | 5600 |
+| 33 | TABBY SHOULDER BAG 26 | CCW87 | 粉/奶油色珠饰蝴蝶结、礼物感 | 黑色水洗丹宁面料 | 26 | 4550 |
+| 34 | TABBY SHOULDER BAG 26 | CCW88 | 多色珠饰满版蛇纹幻觉、自然光泽 | 多色珠饰 | 26 | 5600 |
+| 35 | TABBY SHOULDER BAG 26 | CCW89 | 满版珠饰老虎印花、珠饰缝于缎面底布 | 满版珠饰、缎面底布 | 26 | 5600 |
+| 36 | TABBY SHOULDER BAG 26 | CCW91 | 手工珠饰+麂皮流苏、1920流苏裙灵感 | 手工珠饰与麂皮流苏 | 26 | 6500 |
+| 37 | TABBY SHOULDER BAG 26 | CCW92 | 不同尺寸水晶点缀、仿旧怀旧效果 | 浅色水洗丹宁面料 | 26 | 4550 |
+| 38 | TABBY SHOULDER BAG 26 | CCW94 | 复古刺绣花卉、附皮革花卉挂饰（中央旋锁） | 复古刺绣、麂皮 | 26 | 4550 |
+| 39 | TABBY SHOULDER BAG 26 | CCW96 | 经典水晶 Signature、奢华麂皮 | 水晶、奢华麂皮 | 26 | 5950 |
+| 40 | 麂皮 CHAIN TABBY SHOULDER BAG | CCK51 | 麂皮纹理鲜明柔软、西部趋势、链条、跨品类麂皮搭配 | SUEDE 麂皮 | 未明确 | 4750 |
+| 41 | TABBY SHOULDER BAG 20 | CY200 | 1970经典、挺阔长方形、可手提、可拆皮质肩带+斜背带、外部插袋、明缝线 | 未明确 | 20 | 3650 |
+| 42 | TABBY SHOULDER BAG 26 | CCX63 | 星星/四叶草(1941)/安全扣/马蹄铁装饰、华丽摇滚 | 华丽摇滚风（灵感） | 26 | 6500 |
+| 43 | QUILTED DENIM TABBY BACKPACK | CZ747 | 丹宁绗缝、休闲日常 | 丹宁面料 | 未明确 | 4550 |
+| 44 | QUILTED LEATHER TABBY BACKPACK | CU076 | 可转斜背（拉出顶部肩带）、抛光黄铜五金、包裹皮革 Signature C 闭合、90年代 | 超柔软 Nappa 皮革 | 未明确 | 4750 |
 
 ### 门店常用语 / 尺寸变体词典（业务老师 F 节补充，标来源）
 > 来源：新场景资料·F 节企业专有名词（SA 门店缩写）；用于"听懂门店叫法 + 答容量问"，非课程材质事实主来源。
@@ -86,7 +136,7 @@ Tabby 是 Coach 最具代表性的标志性手袋系列之一，被定位为"现
 **A6**：Times Square 取自纽约市（出租车、自由女神、大苹果等）；Quilted Denim 是 Y2K 丹宁趋势；Western 是美式西部；Twisted 取自超现实主义艺术（不对称扭曲）；Sketch/报纸印花取自经典 Peanuts 漫画与 60 年代报纸；Knit Soft 是超大 Signature C 针织图案。
 
 **Q7**：多少钱 / 有没有现货 / 精确尺寸多少 cm？
-**A7**：价格、库存、精确尺寸以门店主数据为准【待客户补充】——课程未提供，不臆测。
+**A7**：Tabby 价位约 ¥3650–7950，每款标价见下方「逐款 SKU 明细表（业务·产品列表 Excel）」；实时库存与促销价以门店系统为准。精确 cm 尺寸部分款未标注，以门店主数据为准。
 
 ### 常见异议及应对（写关切主题与方向，不写完整台词）
 | 关切主题 | 应对方向 |
@@ -98,7 +148,7 @@ Tabby 是 Coach 最具代表性的标志性手袋系列之一，被定位为"现
 | 价格/材质溢价存疑 | 用"现代经典 + 手工质量 + 媒体背书"重构价值，不只强调贵；材质细节交由皮革异议话术（见关联文档） |
 
 ## 待确认事项
-- 各款价格、库存、精确尺寸（cm）：课程未提供，需产品主数据【待客户补充】。
+- 各款价格已按业务产品列表（coach产品-tabby.xlsx，44 款）回填，见「逐款 SKU 明细表」；实时库存与促销以门店系统为准。精确 cm 尺寸部分款仍未标注，以门店主数据为准。
 - 部分 SKU 字号小、清晰度有限，仅保留可辨认部分，不作主检索字段；如需精确 SKU 以主数据为准。
 - Chain Tabby"2025 春季时装秀首发、二月正式在店铺首发"等时间节点为 FY26 季节性表述，需确认当前是否仍为在售/有效口径。
 - Tabby 各子系列当前在售色号：F 节颜色词典为通用参考，具体 Tabby 在售色以门店主数据为准。
