@@ -8,6 +8,8 @@
 tmp/
 
 # Editor config
+.idea/
+*.iml
 .obsidian/
 
 # Large intermediate extraction artifacts (rendered pages/slides, reproducible via extract script)
