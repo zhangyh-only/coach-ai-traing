@@ -1,0 +1,60 @@
+{
+  "summary": {
+    "runId": "20260701_184211",
+    "reportPath": "陪练场景搭建/场景2_奥莱私域轻奢Bella/记录/接口测试输出/batch_aside_regression_20260701_184211.json",
+    "validRecords": [
+      157518,
+      157519,
+      157520
+    ],
+    "contaminatedRecords": [
+      157521
+    ],
+    "recordsWithPsychAside": [],
+    "recordsWithOldRepeat": [],
+    "recordsMissingHints": [],
+    "recordsWithPlaceholderLeft": []
+  },
+  "results": [
+    {
+      "index": 1,
+      "recordId": 157518,
+      "contaminated": false,
+      "turnCount": 4,
+      "traceCount": 4,
+      "hasAllHints": true,
+      "placeholderLeft": false,
+      "psychAsideLoops": [],
+      "oldRepeatLoops": []
+    },
+    {
+      "index": 2,
+      "recordId": 157519,
+      "contaminated": false,
+      "turnCount": 4,
+      "traceCount": 4,
+      "hasAllHints": true,
+      "placeholderLeft": false,
+      "psychAsideLoops": [],
+      "oldRepeatLoops": []
+    },
+    {
+      "index": 3,
+      "recordId": 157520,
+      "contaminated": false,
+      "turnCount": 4,
+      "traceCount": 4,
+      "hasAllHints": true,
+      "placeholderLeft": false,
+      "psychAsideLoops": [],
+      "oldRepeatLoops": []
+    },
+    {
+      "index": 4,
+      "recordId": 157521,
+      "contaminated": true,
+      "error": "timeout('timed out')",
+      "traceback": "Traceback (most recent call last):\n  File \"<stdin>\", line 32, in <module>\n  File \"/Users/zhangyh/.codex/worktrees/0338/coach-ai-traing/scripts/roleplay_api_test.py\", line 133, in pull_sse\n    for raw in r:\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/http/client.py\", line 657, in readline\n    return super().readline(limit)\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/http/client.py\", line 649, in peek\n    return self._peek_chunked(n)\nsocket.timeout: timed out\n"
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "summary": {
+    "runId": "20260701_185801",
+    "reportPath": "陪练场景搭建/场景2_奥莱私域轻奢Bella/记录/接口测试输出/end_chat_regression_strict_20260701_185801.json",
+    "validRecords": [
+      157526,
+      157527
+    ],
+    "endedRecords": [
+      157526,
+      157527
+    ],
+    "notEndedRecords": [],
+    "contaminatedRecords": [],
+    "recordsWithMissingState": [],
+    "recordsWithPsychAside": [],
+    "recordsWithPlaceholderLeft": []
+  },
+  "results": [
+    {
+      "caseName": "think_close_strict",
+      "recordId": 157526,
+      "contaminated": false,
+      "turnCount": 5,
+      "ended": true,
+      "endLoops": [
+        4
+      ],
+      "missingStateLoops": [],
+      "psychAsideLoops": [],
+      "placeholderLeft": false,
+      "traceCount": 5,
+      "jsonPath": "/Users/zhangyh/.codex/worktrees/0338/coach-ai-traing/scripts/../陪练场景搭建/场景2_奥莱私域轻奢Bella/记录/接口测试输出/session_rec157526.json"
+    },
+    {
+      "caseName": "deal_close_strict",
+      "recordId": 157527,
+      "contaminated": false,
+      "turnCount": 5,
+      "ended": true,
+      "endLoops": [
+        4
+      ],
+      "missingStateLoops": [],
+      "psychAsideLoops": [],
+      "placeholderLeft": false,
+      "traceCount": 5,
+      "jsonPath": "/Users/zhangyh/.codex/worktrees/0338/coach-ai-traing/scripts/../陪练场景搭建/场景2_奥莱私域轻奢Bella/记录/接口测试输出/session_rec157527.json"
+    }
+  ]
+}
