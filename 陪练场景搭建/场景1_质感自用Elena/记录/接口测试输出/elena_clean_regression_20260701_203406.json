@@ -1,0 +1,135 @@
+{
+  "createdAt": "2026-07-01T20:34:06.603752",
+  "results": [
+    {
+      "recordId": 157570,
+      "turnCount": 3,
+      "personalitySnippet": "【说话气质】慢热、话少，导购太热情会后退；不是冷漠，是怕买错、怕被推着下单，需要自己看、自己感觉。【最先关切】安全感顾虑",
+      "productSnippet": "一只焦糖棕色的小号包，绗缝纹路，带一条可拆的链条肩带，复古工字扣，小巧精致，能手拿也能斜挎。〔本局对应款：Tabby 2",
+      "stateMissing": false,
+      "stateConcernMiss": [],
+      "repeatedConcern": [],
+      "badAside": false,
+      "customer正价": false,
+      "trace正价": false,
+      "oldHint": false,
+      "placeholder": false,
+      "closedHints": [
+        "划算价格/价格价值",
+        "打理耐用/质感售后",
+        "搭配闲置/搭配场合",
+        "某组`，就把这一组当成已经关掉：不再问、不再换个场景复问、不再用“还是有点担心”把它打开。你可以把没被说服记在心里，表现为冷一点、再想想、让导购拿新的检查，或直接收尾；不能再把同组顾虑说成新问题。",
+        "版型塌变形/版型比例"
+      ],
+      "lastCustomer": "（拿起包，仔细看了看链条扣头和皮面边缘）\n\n行，那就拿个新的我检查下吧。"
+    },
+    {
+      "recordId": 157571,
+      "turnCount": 5,
+      "personalitySnippet": "【说话气质】较真、话稍多，会拿别家、同系列或自己旧包做横向比较，但核心是想要一个选择这只的理由，不是一路抬杠。【最先关切",
+      "productSnippet": "一只暖棕色的中号翻盖包，皮面软、带点颗粒纹理和垂坠感，版型偏松弛慵懒、不挺括，复古工字扣，手提斜背都行。〔本局对应款：T",
+      "stateMissing": false,
+      "stateConcernMiss": [
+        {
+          "loop": 1,
+          "category": "搭配场合",
+          "state": "关切=无；动作=试背、看镜子；表态=喜欢",
+          "customer": "（拿起包，对着镜子侧身看）\n\n嗯，这个暖棕色确实挺显气质的，跟我平时穿的那些燕麦色、米白的大衣应该很搭。这种软软的皮面看着是舒服，就是不知道背上身会不会显得太塌、没精神？"
+        }
+      ],
+      "repeatedConcern": [],
+      "badAside": false,
+      "customer正价": false,
+      "trace正价": false,
+      "oldHint": false,
+      "placeholder": false,
+      "closedHints": [
+        "打理耐用/质感售后",
+        "某组`，就把这一组当成已经关掉：不再问、不再换个场景复问、不再用“还是有点担心”把它打开。你可以把没被说服记在心里，表现为冷一点、再想想、让导购拿新的检查，或直接收尾；不能再把同组顾虑说成新问题。",
+        "版型塌变形/版型比例",
+        "重量舒适"
+      ],
+      "lastCustomer": "（对着镜子侧身，把包往身前带了带，看整体比例）\n\n嗯……确实不突兀。这种暖棕配我衣柜里那些米白、驼色的大衣应该挺顺眼的，不会显得太刻意。版型看着是松弛，但上身倒也没觉得没精神。"
+    },
+    {
+      "recordId": 157572,
+      "turnCount": 5,
+      "personalitySnippet": "【说话气质】平稳冷静、话不算多，有自己的预算感但不爱当场拉扯；喜欢也会藏着，先确认是不是值得再往前走。【最先关切】先确认",
+      "productSnippet": "一只暖棕色的中号翻盖包，皮面软、带点颗粒纹理和垂坠感，版型偏松弛慵懒、不挺括，复古工字扣，手提斜背都行。〔本局对应款：T",
+      "stateMissing": false,
+      "stateConcernMiss": [],
+      "repeatedConcern": [],
+      "badAside": false,
+      "customer正价": false,
+      "trace正价": false,
+      "oldHint": false,
+      "placeholder": false,
+      "closedHints": [
+        "某组`，就把这一组当成已经关掉：不再问、不再换个场景复问、不再用“还是有点担心”把它打开。你可以把没被说服记在心里，表现为冷一点、再想想、让导购拿新的检查，或直接收尾；不能再把同组顾虑说成新问题。"
+      ],
+      "lastCustomer": "（对着镜子侧身看）\n\n嗯，确实不突兀。这种暖棕配我衣柜里那些燕麦色、米白的衣服，应该挺顺眼的。看着是比我想的要有质感一点。"
+    },
+    {
+      "recordId": 157573,
+      "turnCount": 3,
+      "personalitySnippet": "【说话气质】平稳冷静、话不算多，有自己的预算感但不爱当场拉扯；喜欢也会藏着，先确认是不是值得再往前走。【最先关切】先确认",
+      "productSnippet": "一只焦糖棕色的中号包，方方正正的翻盖造型，正面复古工字扣，光面牛皮带点温润光泽，能手提也能调肩带斜背。〔本局对应款：Ta",
+      "stateMissing": false,
+      "stateConcernMiss": [],
+      "repeatedConcern": [],
+      "badAside": false,
+      "customer正价": false,
+      "trace正价": false,
+      "oldHint": false,
+      "placeholder": false,
+      "closedHints": [
+        "划算价格/价格价值",
+        "打理耐用/质感售后",
+        "搭配闲置/搭配场合",
+        "某组`，就把这一组当成已经关掉：不再问、不再换个场景复问、不再用“还是有点担心”把它打开。你可以把没被说服记在心里，表现为冷一点、再想想、让导购拿新的检查，或直接收尾；不能再把同组顾虑说成新问题。",
+        "版型塌变形/版型比例"
+      ],
+      "lastCustomer": "（把包递回给导购）\n\n那就拿个新的给我看看吧。"
+    },
+    {
+      "recordId": 157574,
+      "turnCount": 3,
+      "personalitySnippet": "【说话气质】慢热、话少，导购太热情会后退；不是冷漠，是怕买错、怕被推着下单，需要自己看、自己感觉。【最先关切】安全感顾虑",
+      "productSnippet": "一只太妃棕的中号翻盖包，皮面深浅交错、光泽低调不抢眼，复古工字扣，看着挺有质感。〔本局对应款：Spazzolato Ta",
+      "stateMissing": false,
+      "stateConcernMiss": [],
+      "repeatedConcern": [],
+      "badAside": false,
+      "customer正价": false,
+      "trace正价": false,
+      "oldHint": false,
+      "placeholder": false,
+      "closedHints": [
+        "划算价格/价格价值",
+        "打理耐用/质感售后",
+        "搭配闲置/搭配场合",
+        "某组`，就把这一组当成已经关掉：不再问、不再换个场景复问、不再用“还是有点担心”把它打开。你可以把没被说服记在心里，表现为冷一点、再想想、让导购拿新的检查，或直接收尾；不能再把同组顾虑说成新问题。",
+        "版型塌变形/版型比例"
+      ],
+      "lastCustomer": "（拿起那只太妃棕的包，对着镜子最后看了一眼）\n\n行，那就这只吧。帮我拿个新的检查一下。"
+    },
+    {
+      "recordId": 157575,
+      "turnCount": 5,
+      "personalitySnippet": "【说话气质】一眼喜欢、热络，话偏多，审美感受会露出来；但这个价位买包也要花得明白，最后只补一个临门确认，不把所有风险都盘",
+      "productSnippet": "一只鞍棕色的中号翻盖包，方版、复古工字扣，皮面细腻有温润光泽，配一条金属链条肩带，手提、肩背、斜挎都行。〔本局对应款：C",
+      "stateMissing": false,
+      "stateConcernMiss": [],
+      "repeatedConcern": [],
+      "badAside": false,
+      "customer正价": false,
+      "trace正价": false,
+      "oldHint": false,
+      "placeholder": false,
+      "closedHints": [
+        "某组`，就把这一组当成已经关掉：不再问、不再换个场景复问、不再用“还是有点担心”把它打开。你可以把没被说服记在心里，表现为冷一点、再想想、让导购拿新的检查，或直接收尾；不能再把同组顾虑说成新问题。"
+      ],
+      "lastCustomer": "（对着镜子侧身看了看，又转回来正对）\n\n嗯……确实不突兀。这鞍棕色跟我那件驼色大衣挺搭的，上班背也不扎眼。"
+    }
+  ]
+}

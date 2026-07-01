@@ -1,0 +1,33 @@
+{
+  "createdAt": "2026-07-01T20:35:46.097668",
+  "results": [
+    {
+      "kind": "deal",
+      "recordId": 157576,
+      "turnCount": 5,
+      "ended": false,
+      "endOnlyLast": false,
+      "stateMissing": false,
+      "badAside": false,
+      "customer正价": false,
+      "trace正价": false,
+      "oldHint": false,
+      "placeholder": false,
+      "lastCustomer": "好嘞，麻烦你了。"
+    },
+    {
+      "kind": "think",
+      "recordId": 157577,
+      "turnCount": 4,
+      "ended": true,
+      "endOnlyLast": true,
+      "stateMissing": false,
+      "badAside": false,
+      "customer正价": false,
+      "trace正价": false,
+      "oldHint": false,
+      "placeholder": false,
+      "lastCustomer": "好嘞，谢谢。\n<?END_CHAT>"
+    }
+  ]
+}

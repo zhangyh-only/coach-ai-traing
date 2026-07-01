@@ -1,0 +1,19 @@
+{
+  "createdAt": "2026-07-01T20:37:26.361245",
+  "results": [
+    {
+      "kind": "deal_retest",
+      "recordId": 157578,
+      "turnCount": 5,
+      "ended": true,
+      "endOnlyLast": true,
+      "stateMissing": false,
+      "badAside": false,
+      "customer正价": false,
+      "trace正价": false,
+      "oldHint": false,
+      "placeholder": false,
+      "lastCustomer": "好嘞，麻烦你了。\n<?END_CHAT>"
+    }
+  ]
+}
