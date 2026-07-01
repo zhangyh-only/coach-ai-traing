@@ -1,0 +1,520 @@
+{
+  "summary": {
+    "runId": "20260701_183453",
+    "reportPath": "陪练场景搭建/场景2_奥莱私域轻奢Bella/记录/接口测试输出/batch_regression_20260701_183453.json",
+    "totalRecords": 9,
+    "validRecords": 9,
+    "contaminatedRecords": [],
+    "personalityCoverage": [
+      "A-精算型",
+      "B-比价型",
+      "C-怕踩坑型",
+      "D-心动型"
+    ],
+    "productFamilyCoverage": [
+      "ChainTabby",
+      "Other",
+      "Tabby20",
+      "Tabby26"
+    ],
+    "productColorCoverage": [
+      "棕色系",
+      "浅色",
+      "麂皮/绒面"
+    ],
+    "recordsWithClosureHint": [
+      157509,
+      157510,
+      157511,
+      157512,
+      157513,
+      157514,
+      157515,
+      157516,
+      157517
+    ],
+    "recordsWithPlaceholderLeft": [],
+    "recordsWithFlagsAfterClosure": [
+      {
+        "recordId": 157512,
+        "flags": [
+          {
+            "loop": 2,
+            "flag": "psychAside"
+          }
+        ]
+      },
+      {
+        "recordId": 157516,
+        "flags": [
+          {
+            "loop": 2,
+            "flag": "psychAside"
+          }
+        ]
+      }
+    ]
+  },
+  "results": [
+    {
+      "index": 1,
+      "startedAt": "2026-07-01T18:34:53",
+      "recordId": 157509,
+      "personalityClass": "D-心动型",
+      "productName": "Tabby 20 焦糖棕",
+      "productFamily": "Tabby20",
+      "productColorClass": "棕色系",
+      "contaminated": false,
+      "turnCount": 4,
+      "traceCount": 4,
+      "traceSummary": [
+        {
+          "loopIndex": 0,
+          "promptLength": 7246,
+          "placeholderLeft": false,
+          "hasMaterialHint": false,
+          "hasPriceHint": false,
+          "hasAuthHint": false
+        },
+        {
+          "loopIndex": 1,
+          "promptLength": 7411,
+          "placeholderLeft": false,
+          "hasMaterialHint": false,
+          "hasPriceHint": true,
+          "hasAuthHint": true
+        },
+        {
+          "loopIndex": 2,
+          "promptLength": 7461,
+          "placeholderLeft": false,
+          "hasMaterialHint": true,
+          "hasPriceHint": true,
+          "hasAuthHint": true
+        },
+        {
+          "loopIndex": 3,
+          "promptLength": 7461,
+          "placeholderLeft": false,
+          "hasMaterialHint": true,
+          "hasPriceHint": true,
+          "hasAuthHint": true
+        }
+      ],
+      "allClosureHintsSeen": true,
+      "placeholderLeft": false,
+      "flagsAfterClosure": [],
+      "jsonPath": "/Users/zhangyh/.codex/worktrees/0338/coach-ai-traing/scripts/../陪练场景搭建/场景2_奥莱私域轻奢Bella/记录/接口测试输出/session_rec157509.json"
+    },
+    {
+      "index": 2,
+      "startedAt": "2026-07-01T18:35:35",
+      "recordId": 157510,
+      "personalityClass": "B-比价型",
+      "productName": "Chain Tabby 26 鞍棕",
+      "productFamily": "ChainTabby",
+      "productColorClass": "棕色系",
+      "contaminated": false,
+      "turnCount": 4,
+      "traceCount": 4,
+      "traceSummary": [
+        {
+          "loopIndex": 0,
+          "promptLength": 7269,
+          "placeholderLeft": false,
+          "hasMaterialHint": false,
+          "hasPriceHint": false,
+          "hasAuthHint": false
+        },
+        {
+          "loopIndex": 1,
+          "promptLength": 7428,
+          "placeholderLeft": false,
+          "hasMaterialHint": false,
+          "hasPriceHint": true,
+          "hasAuthHint": true
+        },
+        {
+          "loopIndex": 2,
+          "promptLength": 7484,
+          "placeholderLeft": false,
+          "hasMaterialHint": true,
+          "hasPriceHint": true,
+          "hasAuthHint": true
+        },
+        {
+          "loopIndex": 3,
+          "promptLength": 7484,
+          "placeholderLeft": false,
+          "hasMaterialHint": true,
+          "hasPriceHint": true,
+          "hasAuthHint": true
+        }
+      ],
+      "allClosureHintsSeen": true,
+      "placeholderLeft": false,
+      "flagsAfterClosure": [],
+      "jsonPath": "/Users/zhangyh/.codex/worktrees/0338/coach-ai-traing/scripts/../陪练场景搭建/场景2_奥莱私域轻奢Bella/记录/接口测试输出/session_rec157510.json"
+    },
+    {
+      "index": 3,
+      "startedAt": "2026-07-01T18:36:15",
+      "recordId": 157511,
+      "personalityClass": "C-怕踩坑型",
+      "productName": "Tabby 20 鞍棕",
+      "productFamily": "Tabby20",
+      "productColorClass": "棕色系",
+      "contaminated": false,
+      "turnCount": 4,
+      "traceCount": 4,
+      "traceSummary": [
+        {
+          "loopIndex": 0,
+          "promptLength": 7286,
+          "placeholderLeft": false,
+          "hasMaterialHint": false,
+          "hasPriceHint": false,
+          "hasAuthHint": false
+        },
+        {
+          "loopIndex": 1,
+          "promptLength": 7395,
+          "placeholderLeft": false,
+          "hasMaterialHint": false,
+          "hasPriceHint": true,
+          "hasAuthHint": true
+        },
+        {
+          "loopIndex": 2,
+          "promptLength": 7445,
+          "placeholderLeft": false,
+          "hasMaterialHint": true,
+          "hasPriceHint": true,
+          "hasAuthHint": true
+        },
+        {
+          "loopIndex": 3,
+          "promptLength": 7501,
+          "placeholderLeft": false,
+          "hasMaterialHint": true,
+          "hasPriceHint": true,
+          "hasAuthHint": true
+        }
+      ],
+      "allClosureHintsSeen": true,
+      "placeholderLeft": false,
+      "flagsAfterClosure": [],
+      "jsonPath": "/Users/zhangyh/.codex/worktrees/0338/coach-ai-traing/scripts/../陪练场景搭建/场景2_奥莱私域轻奢Bella/记录/接口测试输出/session_rec157511.json"
+    },
+    {
+      "index": 4,
+      "startedAt": "2026-07-01T18:36:55",
+      "recordId": 157512,
+      "personalityClass": "A-精算型",
+      "productName": "Tabby Shoulder Bag 26 暖棕",
+      "productFamily": "Other",
+      "productColorClass": "棕色系",
+      "contaminated": false,
+      "turnCount": 4,
+      "traceCount": 4,
+      "traceSummary": [
+        {
+          "loopIndex": 0,
+          "promptLength": 7300,
+          "placeholderLeft": false,
+          "hasMaterialHint": false,
+          "hasPriceHint": false,
+          "hasAuthHint": false
+        },
+        {
+          "loopIndex": 1,
+          "promptLength": 7509,
+          "placeholderLeft": false,
+          "hasMaterialHint": true,
+          "hasPriceHint": true,
+          "hasAuthHint": true
+        },
+        {
+          "loopIndex": 2,
+          "promptLength": 7509,
+          "placeholderLeft": false,
+          "hasMaterialHint": true,
+          "hasPriceHint": true,
+          "hasAuthHint": true
+        },
+        {
+          "loopIndex": 3,
+          "promptLength": 7516,
+          "placeholderLeft": false,
+          "hasMaterialHint": true,
+          "hasPriceHint": true,
+          "hasAuthHint": true
+        }
+      ],
+      "allClosureHintsSeen": true,
+      "placeholderLeft": false,
+      "flagsAfterClosure": [
+        {
+          "loop": 2,
+          "flag": "psychAside"
+        }
+      ],
+      "jsonPath": "/Users/zhangyh/.codex/worktrees/0338/coach-ai-traing/scripts/../陪练场景搭建/场景2_奥莱私域轻奢Bella/记录/接口测试输出/session_rec157512.json"
+    },
+    {
+      "index": 5,
+      "startedAt": "2026-07-01T18:37:36",
+      "recordId": 157513,
+      "personalityClass": "B-比价型",
+      "productName": "Tabby Shoulder Bag 20 奶油白",
+      "productFamily": "Other",
+      "productColorClass": "浅色",
+      "contaminated": false,
+      "turnCount": 4,
+      "traceCount": 4,
+      "traceSummary": [
+        {
+          "loopIndex": 0,
+          "promptLength": 7267,
+          "placeholderLeft": false,
+          "hasMaterialHint": false,
+          "hasPriceHint": false,
+          "hasAuthHint": false
+        },
+        {
+          "loopIndex": 1,
+          "promptLength": 7476,
+          "placeholderLeft": false,
+          "hasMaterialHint": true,
+          "hasPriceHint": true,
+          "hasAuthHint": true
+        },
+        {
+          "loopIndex": 2,
+          "promptLength": 7476,
+          "placeholderLeft": false,
+          "hasMaterialHint": true,
+          "hasPriceHint": true,
+          "hasAuthHint": true
+        },
+        {
+          "loopIndex": 3,
+          "promptLength": 7482,
+          "placeholderLeft": false,
+          "hasMaterialHint": true,
+          "hasPriceHint": true,
+          "hasAuthHint": true
+        }
+      ],
+      "allClosureHintsSeen": true,
+      "placeholderLeft": false,
+      "flagsAfterClosure": [],
+      "jsonPath": "/Users/zhangyh/.codex/worktrees/0338/coach-ai-traing/scripts/../陪练场景搭建/场景2_奥莱私域轻奢Bella/记录/接口测试输出/session_rec157513.json"
+    },
+    {
+      "index": 6,
+      "startedAt": "2026-07-01T18:38:21",
+      "recordId": 157514,
+      "personalityClass": "C-怕踩坑型",
+      "productName": "Tabby 20 鞍棕",
+      "productFamily": "Tabby20",
+      "productColorClass": "棕色系",
+      "contaminated": false,
+      "turnCount": 4,
+      "traceCount": 4,
+      "traceSummary": [
+        {
+          "loopIndex": 0,
+          "promptLength": 7286,
+          "placeholderLeft": false,
+          "hasMaterialHint": false,
+          "hasPriceHint": false,
+          "hasAuthHint": false
+        },
+        {
+          "loopIndex": 1,
+          "promptLength": 7439,
+          "placeholderLeft": false,
+          "hasMaterialHint": false,
+          "hasPriceHint": true,
+          "hasAuthHint": true
+        },
+        {
+          "loopIndex": 2,
+          "promptLength": 7489,
+          "placeholderLeft": false,
+          "hasMaterialHint": true,
+          "hasPriceHint": true,
+          "hasAuthHint": true
+        },
+        {
+          "loopIndex": 3,
+          "promptLength": 7489,
+          "placeholderLeft": false,
+          "hasMaterialHint": true,
+          "hasPriceHint": true,
+          "hasAuthHint": true
+        }
+      ],
+      "allClosureHintsSeen": true,
+      "placeholderLeft": false,
+      "flagsAfterClosure": [],
+      "jsonPath": "/Users/zhangyh/.codex/worktrees/0338/coach-ai-traing/scripts/../陪练场景搭建/场景2_奥莱私域轻奢Bella/记录/接口测试输出/session_rec157514.json"
+    },
+    {
+      "index": 7,
+      "startedAt": "2026-07-01T18:39:01",
+      "recordId": 157515,
+      "personalityClass": "C-怕踩坑型",
+      "productName": "Chain Tabby 26 鞍棕",
+      "productFamily": "ChainTabby",
+      "productColorClass": "棕色系",
+      "contaminated": false,
+      "turnCount": 4,
+      "traceCount": 4,
+      "traceSummary": [
+        {
+          "loopIndex": 0,
+          "promptLength": 7293,
+          "placeholderLeft": false,
+          "hasMaterialHint": false,
+          "hasPriceHint": false,
+          "hasAuthHint": false
+        },
+        {
+          "loopIndex": 1,
+          "promptLength": 7502,
+          "placeholderLeft": false,
+          "hasMaterialHint": true,
+          "hasPriceHint": true,
+          "hasAuthHint": true
+        },
+        {
+          "loopIndex": 2,
+          "promptLength": 7502,
+          "placeholderLeft": false,
+          "hasMaterialHint": true,
+          "hasPriceHint": true,
+          "hasAuthHint": true
+        },
+        {
+          "loopIndex": 3,
+          "promptLength": 7508,
+          "placeholderLeft": false,
+          "hasMaterialHint": true,
+          "hasPriceHint": true,
+          "hasAuthHint": true
+        }
+      ],
+      "allClosureHintsSeen": true,
+      "placeholderLeft": false,
+      "flagsAfterClosure": [],
+      "jsonPath": "/Users/zhangyh/.codex/worktrees/0338/coach-ai-traing/scripts/../陪练场景搭建/场景2_奥莱私域轻奢Bella/记录/接口测试输出/session_rec157515.json"
+    },
+    {
+      "index": 8,
+      "startedAt": "2026-07-01T18:39:39",
+      "recordId": 157516,
+      "personalityClass": "C-怕踩坑型",
+      "productName": "Tabby Shoulder Bag 26 暖棕",
+      "productFamily": "Other",
+      "productColorClass": "棕色系",
+      "contaminated": false,
+      "turnCount": 4,
+      "traceCount": 4,
+      "traceSummary": [
+        {
+          "loopIndex": 0,
+          "promptLength": 7300,
+          "placeholderLeft": false,
+          "hasMaterialHint": false,
+          "hasPriceHint": false,
+          "hasAuthHint": false
+        },
+        {
+          "loopIndex": 1,
+          "promptLength": 7509,
+          "placeholderLeft": false,
+          "hasMaterialHint": true,
+          "hasPriceHint": true,
+          "hasAuthHint": true
+        },
+        {
+          "loopIndex": 2,
+          "promptLength": 7515,
+          "placeholderLeft": false,
+          "hasMaterialHint": true,
+          "hasPriceHint": true,
+          "hasAuthHint": true
+        },
+        {
+          "loopIndex": 3,
+          "promptLength": 7515,
+          "placeholderLeft": false,
+          "hasMaterialHint": true,
+          "hasPriceHint": true,
+          "hasAuthHint": true
+        }
+      ],
+      "allClosureHintsSeen": true,
+      "placeholderLeft": false,
+      "flagsAfterClosure": [
+        {
+          "loop": 2,
+          "flag": "psychAside"
+        }
+      ],
+      "jsonPath": "/Users/zhangyh/.codex/worktrees/0338/coach-ai-traing/scripts/../陪练场景搭建/场景2_奥莱私域轻奢Bella/记录/接口测试输出/session_rec157516.json"
+    },
+    {
+      "index": 9,
+      "startedAt": "2026-07-01T18:40:19",
+      "recordId": 157517,
+      "personalityClass": "B-比价型",
+      "productName": "麂皮 Tabby 26 棕",
+      "productFamily": "Tabby26",
+      "productColorClass": "麂皮/绒面",
+      "contaminated": false,
+      "turnCount": 4,
+      "traceCount": 4,
+      "traceSummary": [
+        {
+          "loopIndex": 0,
+          "promptLength": 7263,
+          "placeholderLeft": false,
+          "hasMaterialHint": false,
+          "hasPriceHint": false,
+          "hasAuthHint": false
+        },
+        {
+          "loopIndex": 1,
+          "promptLength": 7422,
+          "placeholderLeft": false,
+          "hasMaterialHint": true,
+          "hasPriceHint": true,
+          "hasAuthHint": true
+        },
+        {
+          "loopIndex": 2,
+          "promptLength": 7422,
+          "placeholderLeft": false,
+          "hasMaterialHint": true,
+          "hasPriceHint": true,
+          "hasAuthHint": true
+        },
+        {
+          "loopIndex": 3,
+          "promptLength": 7478,
+          "placeholderLeft": false,
+          "hasMaterialHint": true,
+          "hasPriceHint": true,
+          "hasAuthHint": true
+        }
+      ],
+      "allClosureHintsSeen": true,
+      "placeholderLeft": false,
+      "flagsAfterClosure": [],
+      "jsonPath": "/Users/zhangyh/.codex/worktrees/0338/coach-ai-traing/scripts/../陪练场景搭建/场景2_奥莱私域轻奢Bella/记录/接口测试输出/session_rec157517.json"
+    }
+  ]
+}

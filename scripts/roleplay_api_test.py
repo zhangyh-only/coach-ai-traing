@@ -3,17 +3,18 @@
 """
 Coach 角色扮演链 · 本地业务接口测试工具（单步式）
 =================================================
-配合"由我（Claude）逐轮扮演 SA 销售"的可循环自动测试：每轮我看 Elena 上一句、
-生成一句导购应答、喂进来、拿到 Elena 这轮的真实回复，自动追加存盘。一局跑完后
+配合"由我逐轮扮演 SA 销售"的可循环自动测试：每轮看 AI 顾客上一句、
+生成一句导购应答、喂进来、拿到 AI 顾客这轮的真实回复，自动追加存盘。一局跑完后
 我再对整局做分析、把判断写进记录，最终用 build_report.py 汇成 HTML 记录浏览器。
 
-链路（见 公共_跨场景复用/本地场景测试接口说明.md，baseId=497）：
+链路（可用环境变量切换 baseId/actionId）：
   begin（建记录, 拿 recordId）→ 每轮 recordInput→openStream→sse → getRoleRandomData（拿这局性子/产品）
 
 子命令：
   begin                          建一局，输出 RECORD_ID 和 JSON 路径
   step <recordId> "<SA这句话>"    跑一轮（自动算轮次、追加存盘），打印 Elena 这轮回复
   show <recordId>                打印该局当前完整对话
+  prompt-trace <recordId>        拉取该局每轮最终调用模型的 prompt（需 80 服务已接入 prompt trace）
   probe                          只探活 begin（排查连通/声纹）
 
 纯标准库、无第三方依赖。
@@ -28,22 +29,28 @@ import urllib.request
 import urllib.error
 
 # ─────────────────── 配置（来自 本地场景测试接口说明.md）───────────────────
-CONFI = "http://127.0.0.1:8080"
-AI = "http://127.0.0.1:80"
-COMPANY = "ruixue_dev"
-CERT = "sinoStrong"
+def _env_int(name, default):
+    value = os.environ.get(name)
+    return int(value) if value else default
 
-BASE_ID = 497
-MEMBER_ID = 40147
-BOT_DISPLAY_CONFIG_ID = 747
-ACTION_ID_INPUT = 2373
-FLOW_ID = 1251
-ACTION_ID_STREAM = 2374
+
+CONFI = os.environ.get("ROLEPLAY_CONFI", "http://127.0.0.1:8080")
+AI = os.environ.get("ROLEPLAY_AI", "http://127.0.0.1:80")
+COMPANY = os.environ.get("ROLEPLAY_COMPANY", "ruixue_dev")
+CERT = os.environ.get("ROLEPLAY_CERT", "sinoStrong")
+
+BASE_ID = _env_int("ROLEPLAY_BASE_ID", 497)
+MEMBER_ID = _env_int("ROLEPLAY_MEMBER_ID", 40147)
+BOT_DISPLAY_CONFIG_ID = _env_int("ROLEPLAY_BOT_DISPLAY_CONFIG_ID", 747)
+ACTION_ID_INPUT = _env_int("ROLEPLAY_ACTION_ID_INPUT", 2373)
+FLOW_ID = _env_int("ROLEPLAY_FLOW_ID", 1251)
+ACTION_ID_STREAM = _env_int("ROLEPLAY_ACTION_ID_STREAM", 2374)
+SCENE_DIR = os.environ.get("ROLEPLAY_SCENE_DIR", "场景1_质感自用Elena")
 
 HTTP_TIMEOUT = 30
 SSE_TIMEOUT = 180
 OUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..",
-                       "陪练场景搭建", "场景1_质感自用Elena", "记录", "接口测试输出")
+                       "陪练场景搭建", SCENE_DIR, "记录", "接口测试输出")
 END_TAG = "<?END_CHAT>"
 
 
@@ -151,6 +158,11 @@ def get_random(record_id):
     return out
 
 
+def get_prompt_trace(record_id):
+    url = f"{AI}/ailearning/nstr/tool/getRoleplayPromptTrace?recordId={record_id}&companyCode={COMPANY}&certificate={CERT}"
+    return _check(_get(url), "getRoleplayPromptTrace").get("data") or []
+
+
 def _split_state(text):
     """分离模型输出里的 <?STATE>自盘点<?ENDSTATE> 与 Elena 正文。
     前端虽自兼容隐藏，但测试要把盘点单独留出来调试、把正文清干净。"""
@@ -197,6 +209,8 @@ def cmd_begin():
             "personality": "", "product": "", "turns": [], "analysis": None}
     _save(data)
     print(f"RECORD_ID={rid}")
+    print(f"CONFIG baseId={BASE_ID} botDisplayConfigId={BOT_DISPLAY_CONFIG_ID} flowId={FLOW_ID} "
+          f"inputActionId={ACTION_ID_INPUT} streamActionId={ACTION_ID_STREAM}")
     print(f"JSON={_session_path(rid)}")
     print("（下一步：python3 scripts/roleplay_api_test.py step %s \"SA第一句话\"）" % rid)
     return rid
@@ -208,13 +222,13 @@ def cmd_step(record_id, sa_text):
     bind_id = record_input(record_id, sa_text, loop)
     serial = open_stream(record_id, bind_id, sa_text, loop)
     raw = pull_sse(serial)
-    state, elena = _split_state(raw)
-    data["turns"].append({"loop": loop, "sa": sa_text, "elena": elena, "state": state})
+    state, customer = _split_state(raw)
+    data["turns"].append({"loop": loop, "sa": sa_text, "elena": customer, "state": state})
     if loop == 0 and not data.get("product"):
         try:
             rand = get_random(record_id)
-            data["personality"] = rand.get("roleplay_personality", "")
-            data["product"] = rand.get("roleplay_product", "")
+            data["personality"] = rand.get("rolePlayPersonality") or rand.get("roleplay_personality", "")
+            data["product"] = rand.get("rolePlayProduct") or rand.get("roleplay_product", "")
         except Exception as e:
             print(f"(取随机池失败: {e})")
     _save(data)
@@ -222,13 +236,13 @@ def cmd_step(record_id, sa_text):
     print(f"[SA   ] {sa_text}")
     if state:
         print(f"[盘点 ] {state}")
-    print(f"[Elena] {elena}")
+    print(f"[顾客 ] {customer}")
     if loop == 0 and data.get("product"):
         print(f"[本局性子] {data['personality']}")
         print(f"[本局产品] {data['product']}")
-    if END_TAG in (elena or ""):
-        print("⟵ Elena 输出了结束标签，本局自然收尾。")
-    return elena
+    if END_TAG in (customer or ""):
+        print("⟵ AI 顾客输出了结束标签，本局自然收尾。")
+    return customer
 
 
 def cmd_show(record_id):
@@ -241,6 +255,16 @@ def cmd_show(record_id):
         print(f"[{t['loop']}] Elena: {t['elena']}")
     if data.get("analysis"):
         print(f"\n分析：{json.dumps(data['analysis'], ensure_ascii=False, indent=2)}")
+
+
+def cmd_prompt_trace(record_id):
+    traces = get_prompt_trace(record_id)
+    if not traces:
+        print("暂无 prompt trace。请确认 80 服务已重启到包含 trace 的版本，并至少跑过一轮 bot-answer。")
+        return
+    for trace in traces:
+        print(f"===== loop={trace.get('loopIndex')} baseId={trace.get('baseId')} actionId={trace.get('actionId')} =====")
+        print(trace.get("prompt") or "")
 
 
 def prompt_query():
@@ -284,6 +308,10 @@ def main():
             cmd_step(int(args[1]), args[2])
         elif cmd == "show":
             cmd_show(int(args[1]))
+        elif cmd == "prompt-trace":
+            if len(args) < 2:
+                print("用法：prompt-trace <recordId>"); sys.exit(1)
+            cmd_prompt_trace(int(args[1]))
         elif cmd == "prompt-get":
             d = prompt_query()
             v = d.get("templateValue", "")
