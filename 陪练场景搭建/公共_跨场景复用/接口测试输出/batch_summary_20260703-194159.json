@@ -1,0 +1,60 @@
+[
+  {
+    "case": "case01_正品解释后自然转价格",
+    "elapsedMs": 1716,
+    "requestId": "9b592813-39cd-9be7-bfa2-ad2799ab1591",
+    "text": "那我平时上班背应该也合适吧？价格上具体优惠了多少啊？",
+    "diagnosis": {
+      "has_repeat_risk": false,
+      "hit_terms": []
+    },
+    "artifact": "陪练场景搭建/公共_跨场景复用/接口测试输出/batch_20260703-194153_case01_正品解释后自然转价格.json"
+  },
+  {
+    "case": "case02_搭配解释后不要再问正式感",
+    "elapsedMs": 1762,
+    "requestId": "bbddb744-e740-94db-96b6-3a2464224966",
+    "text": "哦，那搭配休闲装也好看啊。（低头又看了看包）这个尺寸能放下我的手机和钱包吧？",
+    "diagnosis": {
+      "has_repeat_risk": false,
+      "hit_terms": []
+    },
+    "artifact": "陪练场景搭建/公共_跨场景复用/接口测试输出/batch_20260703-194155_case02_搭配解释后不要再问正式感.json"
+  },
+  {
+    "case": "case03_容量看过后不要重复问能不能装",
+    "elapsedMs": 1652,
+    "requestId": "2301acc8-b1f8-9756-b7e6-ee1d7cabe280",
+    "text": "（点点头，又看了看包的外观）那这个颜色日常背会不会太浅了，容易脏啊？",
+    "diagnosis": {
+      "has_repeat_risk": false,
+      "hit_terms": []
+    },
+    "artifact": "陪练场景搭建/公共_跨场景复用/接口测试输出/batch_20260703-194156_case03_容量看过后不要重复问能不能装.json"
+  },
+  {
+    "case": "case04_价格解释后自然表态",
+    "elapsedMs": 1317,
+    "requestId": "8bf2df49-ba53-9cc5-9206-ffbcfae07d7f",
+    "text": "那我平时上班、周末逛街背会不会太正式或者太休闲啊？",
+    "diagnosis": {
+      "has_repeat_risk": true,
+      "hit_terms": [
+        "会不会太正式",
+        "太正式"
+      ]
+    },
+    "artifact": "陪练场景搭建/公共_跨场景复用/接口测试输出/batch_20260703-194158_case04_价格解释后自然表态.json"
+  },
+  {
+    "case": "case05_购买信号后不要开启新顾虑",
+    "elapsedMs": 1230,
+    "requestId": "c05332f6-3960-9b91-86fd-0d45ee550d26",
+    "text": "好，我看看五金够不够亮，包身有没有瑕疵。",
+    "diagnosis": {
+      "has_repeat_risk": false,
+      "hit_terms": []
+    },
+    "artifact": "陪练场景搭建/公共_跨场景复用/接口测试输出/batch_20260703-194159_case05_购买信号后不要开启新顾虑.json"
+  }
+]

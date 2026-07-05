@@ -1,0 +1,494 @@
+app:
+  description: "Coach roleplay low-latency workflow: one model call on normal path, script repeat guard, one repair call only when needed."
+  icon: "🧪"
+  icon_type: emoji
+  icon_background: "#E0F2FE"
+  mode: workflow
+  name: coach-roleplay-repeat-guard-fast
+  use_icon_as_answer_icon: false
+kind: app
+version: "0.6.0"
+dependencies: []
+
+workflow:
+  conversation_variables: []
+  environment_variables: []
+  features:
+    file_upload:
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+          - local_file
+          - remote_url
+      enabled: false
+      allowed_file_extensions: []
+      allowed_file_types: []
+      allowed_file_upload_methods:
+        - local_file
+        - remote_url
+      number_limits: 3
+    opening_statement: ""
+    retriever_resource:
+      enabled: false
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ""
+      voice: ""
+  graph:
+    nodes:
+      - id: start
+        type: custom
+        position:
+          x: 80
+          y: 260
+        positionAbsolute:
+          x: 80
+          y: 260
+        selected: false
+        sourcePosition: right
+        targetPosition: left
+        width: 244
+        height: 210
+        data:
+          title: 开始
+          type: start
+          selected: false
+          variables:
+            - variable: sceneCode
+              label: sceneCode
+              type: text-input
+              required: true
+              max_length: 128
+            - variable: userInput
+              label: userInput
+              type: paragraph
+              required: true
+            - variable: dialogueHistory
+              label: dialogueHistory
+              type: paragraph
+              required: true
+            - variable: rolePlayPersonality
+              label: rolePlayPersonality
+              type: paragraph
+              required: true
+            - variable: rolePlayProduct
+              label: rolePlayProduct
+              type: paragraph
+              required: true
+
+      - id: roleplay_generate
+        type: custom
+        position:
+          x: 380
+          y: 260
+        positionAbsolute:
+          x: 380
+          y: 260
+        selected: false
+        sourcePosition: right
+        targetPosition: left
+        width: 244
+        height: 120
+        data:
+          title: 顾客生成
+          type: llm
+          selected: false
+          model:
+            provider: langgenius/tongyi/tongyi
+            name: qwen-plus
+            mode: chat
+            completion_params:
+              temperature: 0.58
+              max_tokens: 520
+          prompt_template:
+            - id: roleplay-system
+              role: system
+              text: |
+                你扮演 Coach 门店里的真实顾客。
+                你不是销售，不是评估老师，不是产品专家。
+                只输出顾客本轮会说的话和必要外显动作。
+                不要输出 JSON，不要输出 STATE，不要解释你的思考过程。
+            - id: roleplay-user
+              role: user
+              text: |
+                场景：{{#start.sceneCode#}}
+
+                本局性格/行为卡：
+                {{#start.rolePlayPersonality#}}
+
+                本局看上的包：
+                {{#start.rolePlayProduct#}}
+
+                完整对话历史：
+                {{#start.dialogueHistory#}}
+
+                SA 本轮说：
+                {{#start.userInput#}}
+
+                请生成顾客本轮回复。
+
+                生成前先在心里做一次快速检查，但不要把检查过程说出来：
+                - 哪些顾虑已经问过并被解释过？
+                - 哪些动作已经做过，例如试背、看内里、摸材质？
+                - 本轮应该承接 SA 的哪句话？
+
+                硬要求：
+                1. 必须承接 SA 本轮说的话。
+                2. 不要把已经问过、已经解释过的顾虑换说法重问。
+                3. 不要把已经做过的动作当没发生，例如已试背、已看内里、已摸材质。
+                4. 如果对同一顾虑仍不满意，只能顺着原问题轻追一句，不能从头再问。
+                5. 一次只推进一个主要意思，一般一到两句。
+                6. Bella 不要变成连续盘问风险的人；Elena 不要变成专业质检员。
+                7. 语气要像真实顾客，短一点、自然一点。
+          context:
+            enabled: false
+            variable_selector: []
+          memory:
+            window:
+              enabled: false
+              size: 50
+            role_prefix:
+              user: ""
+              assistant: ""
+            query_prompt_template: ""
+          variables: []
+          vision:
+            enabled: false
+
+      - id: repeat_guard
+        type: custom
+        position:
+          x: 700
+          y: 260
+        positionAbsolute:
+          x: 700
+          y: 260
+        selected: false
+        sourcePosition: right
+        targetPosition: left
+        width: 244
+        height: 120
+        data:
+          title: 轻量判重
+          type: code
+          selected: false
+          code_language: python3
+          variables:
+            - variable: history
+              value_selector:
+                - start
+                - dialogueHistory
+            - variable: candidate
+              value_selector:
+                - roleplay_generate
+                - text
+          outputs:
+            pass:
+              type: boolean
+            route:
+              type: string
+            repairInstruction:
+              type: string
+          code: |
+            import re
+
+            AUTH_HISTORY = ["正品", "官方", "奥莱门店", "吊牌", "小票", "售后", "渠道", "门店体系"]
+            AUTH_REPEAT = ["正品", "渠道", "靠谱吗", "靠不靠谱", "货源", "假", "专柜一样", "奥莱是不是"]
+
+            VALUE_HISTORY = ["价格", "折扣", "划算", "买贵", "买亏", "值不值"]
+            VALUE_REPEAT = ["划算", "买贵", "买亏", "值不值", "折扣", "价格"]
+
+            TRY_HISTORY = ["试背", "背到肩上", "上身", "镜子前", "试了一下"]
+            TRY_REPEAT = ["能试背", "再试", "试一下", "上身看看", "背一下"]
+
+            INSIDE_HISTORY = ["看内里", "打开看", "容量", "手机", "口红", "纸巾"]
+            INSIDE_REPEAT = ["能装", "容量", "内里", "打开看看", "里面"]
+
+            STYLE_HISTORY = ["日常", "休闲", "正式", "牛仔裤", "针织衫", "小外套", "搭"]
+            STYLE_REPEAT = ["太正式", "正式场合", "休闲", "日常", "好搭", "搭吗", "搭不搭"]
+
+            def hit(text: str, words: list[str]) -> bool:
+                return any(w in text for w in words)
+
+            def main(history: str, candidate: str) -> dict:
+                h = history or ""
+                c = candidate or ""
+                failures = []
+
+                if hit(h, AUTH_HISTORY) and hit(c, AUTH_REPEAT) and ("吗" in c or "？" in c or "?" in c):
+                    failures.append("正品/渠道顾虑历史中已解释过，候选回复又换说法重问。")
+
+                if hit(h, VALUE_HISTORY) and hit(c, VALUE_REPEAT) and ("吗" in c or "？" in c or "?" in c):
+                    failures.append("价格/划算顾虑历史中已聊过，候选回复又从头追问。")
+
+                if hit(h, TRY_HISTORY) and hit(c, TRY_REPEAT):
+                    failures.append("试背/上身动作历史中已发生，候选回复像是没做过。")
+
+                if hit(h, INSIDE_HISTORY) and hit(c, INSIDE_REPEAT) and ("吗" in c or "？" in c or "?" in c):
+                    failures.append("内里/容量历史中已看过或已解释，候选回复又从头问。")
+
+                if hit(h, STYLE_HISTORY) and hit(c, STYLE_REPEAT) and ("吗" in c or "？" in c or "?" in c):
+                    failures.append("搭配/正式感历史中已解释过，候选回复又换说法重问。")
+
+                if not failures:
+                    return {
+                        "pass": True,
+                        "route": "ORIGINAL",
+                        "repairInstruction": ""
+                    }
+
+                return {
+                    "pass": False,
+                    "route": "REPAIR",
+                    "repairInstruction": "；".join(failures) + " 请承接 SA 本轮话术，不要重复已处理内容，转向下一自然动作、感受、搭配、价值判断或购买表态。"
+                }
+
+      - id: if_pass
+        type: custom
+        position:
+          x: 1020
+          y: 260
+        positionAbsolute:
+          x: 1020
+          y: 260
+        selected: false
+        sourcePosition: right
+        targetPosition: left
+        width: 244
+        height: 120
+        data:
+          title: 是否需要修复
+          type: if-else
+          selected: false
+          cases:
+            - id: "true"
+              case_id: "true"
+              logical_operator: and
+              conditions:
+                - id: cond_repair
+                  variable_selector:
+                    - repeat_guard
+                    - route
+                  comparison_operator: is
+                  value: REPAIR
+                  varType: string
+
+      - id: repair_generate
+        type: custom
+        position:
+          x: 1320
+          y: 420
+        positionAbsolute:
+          x: 1320
+          y: 420
+        selected: false
+        sourcePosition: right
+        targetPosition: left
+        width: 244
+        height: 120
+        data:
+          title: 修复生成
+          type: llm
+          selected: false
+          model:
+            provider: langgenius/tongyi/tongyi
+            name: qwen-plus
+            mode: chat
+            completion_params:
+              temperature: 0.35
+              max_tokens: 420
+          prompt_template:
+            - id: repair-system
+              role: system
+              text: |
+                你扮演 Coach 门店里的真实顾客。
+                你现在要修复上一版候选回复。
+                只输出修复后的顾客回复，不要解释。
+            - id: repair-user
+              role: user
+              text: |
+                场景：{{#start.sceneCode#}}
+
+                本局性格/行为卡：
+                {{#start.rolePlayPersonality#}}
+
+                本局产品卡：
+                {{#start.rolePlayProduct#}}
+
+                完整对话历史：
+                {{#start.dialogueHistory#}}
+
+                SA 本轮说：
+                {{#start.userInput#}}
+
+                原候选回复：
+                {{#roleplay_generate.text#}}
+
+                轻量判重失败原因 / 修复方向：
+                {{#repeat_guard.repairInstruction#}}
+
+                请修复成本轮最终顾客回复。
+
+                要求：
+                1. 不要重复已处理顾虑。
+                2. 不要把已完成动作当没发生。
+                3. 必须承接 SA 本轮话术。
+                4. 优先转向下一自然动作、感受、搭配、价值判断或购买表态。
+                5. 一般一到两句，像真实顾客，不要像规则执行器。
+          context:
+            enabled: false
+            variable_selector: []
+          memory:
+            window:
+              enabled: false
+              size: 50
+            role_prefix:
+              user: ""
+              assistant: ""
+            query_prompt_template: ""
+          variables: []
+          vision:
+            enabled: false
+
+      - id: end_success
+        type: custom
+        position:
+          x: 1320
+          y: 160
+        positionAbsolute:
+          x: 1320
+          y: 160
+        selected: false
+        sourcePosition: right
+        targetPosition: left
+        width: 244
+        height: 90
+        data:
+          title: 输出原回复
+          type: end
+          selected: false
+          outputs:
+            - variable: answer
+              value_selector:
+                - roleplay_generate
+                - text
+
+      - id: end_repair
+        type: custom
+        position:
+          x: 1620
+          y: 420
+        positionAbsolute:
+          x: 1620
+          y: 420
+        selected: false
+        sourcePosition: right
+        targetPosition: left
+        width: 244
+        height: 90
+        data:
+          title: 输出修复回复
+          type: end
+          selected: false
+          outputs:
+            - variable: answer
+              value_selector:
+                - repair_generate
+                - text
+
+    edges:
+      - id: e_start_generate
+        source: start
+        target: roleplay_generate
+        sourceHandle: source
+        targetHandle: target
+        type: custom
+        selected: false
+        zIndex: 0
+        data:
+          isInLoop: false
+          isInIteration: false
+          sourceType: start
+          targetType: llm
+
+      - id: e_generate_guard
+        source: roleplay_generate
+        target: repeat_guard
+        sourceHandle: source
+        targetHandle: target
+        type: custom
+        selected: false
+        zIndex: 0
+        data:
+          isInLoop: false
+          isInIteration: false
+          sourceType: llm
+          targetType: code
+
+      - id: e_guard_if
+        source: repeat_guard
+        target: if_pass
+        sourceHandle: source
+        targetHandle: target
+        type: custom
+        selected: false
+        zIndex: 0
+        data:
+          isInLoop: false
+          isInIteration: false
+          sourceType: code
+          targetType: if-else
+
+      - id: e_if_success
+        source: if_pass
+        target: end_success
+        sourceHandle: "false"
+        targetHandle: target
+        type: custom
+        selected: false
+        zIndex: 0
+        data:
+          isInLoop: false
+          isInIteration: false
+          sourceType: if-else
+          targetType: end
+
+      - id: e_if_repair
+        source: if_pass
+        target: repair_generate
+        sourceHandle: "true"
+        targetHandle: target
+        type: custom
+        selected: false
+        zIndex: 0
+        data:
+          isInLoop: false
+          isInIteration: false
+          sourceType: if-else
+          targetType: llm
+
+      - id: e_repair_end
+        source: repair_generate
+        target: end_repair
+        sourceHandle: source
+        targetHandle: target
+        type: custom
+        selected: false
+        zIndex: 0
+        data:
+          isInLoop: false
+          isInIteration: false
+          sourceType: llm
+          targetType: end
+    viewport:
+      x: 80
+      y: 160
+      zoom: 0.8
