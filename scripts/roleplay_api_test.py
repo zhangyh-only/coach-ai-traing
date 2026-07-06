@@ -13,6 +13,10 @@ Coach 角色扮演链 · 本地业务接口测试工具（单步式）
 子命令：
   begin                          建一局，输出 RECORD_ID 和 JSON 路径
   step <recordId> "<SA这句话>"    跑一轮（自动算轮次、追加存盘），打印 Elena 这轮回复
+  run-script <json文件>           按 JSON 话术数组自动跑完整局，遇到 END_CHAT 停止
+  random-config-get <configKey>   查询角色扮演随机池配置
+  random-config-set <configKey> <json文件>  更新角色扮演随机池配置
+  random-config-sync <随机池md文件> [personality|product|all]  从文档同步随机池配置
   show <recordId>                打印该局当前完整对话
   prompt-trace <recordId>        拉取该局每轮最终调用模型的 prompt（需 80 服务已接入 prompt trace）
   probe                          只探活 begin（排查连通/声纹）
@@ -25,6 +29,7 @@ import datetime
 import os
 import re
 import glob
+import urllib.parse
 import urllib.request
 import urllib.error
 
@@ -34,6 +39,11 @@ def _env_int(name, default):
     return int(value) if value else default
 
 
+def _env_int_optional(name):
+    value = os.environ.get(name)
+    return int(value) if value else None
+
+
 CONFI = os.environ.get("ROLEPLAY_CONFI", "http://127.0.0.1:8080")
 AI = os.environ.get("ROLEPLAY_AI", "http://127.0.0.1:80")
 COMPANY = os.environ.get("ROLEPLAY_COMPANY", "ruixue_dev")
@@ -41,11 +51,13 @@ CERT = os.environ.get("ROLEPLAY_CERT", "sinoStrong")
 
 BASE_ID = _env_int("ROLEPLAY_BASE_ID", 497)
 MEMBER_ID = _env_int("ROLEPLAY_MEMBER_ID", 40147)
-BOT_DISPLAY_CONFIG_ID = _env_int("ROLEPLAY_BOT_DISPLAY_CONFIG_ID", 747)
-ACTION_ID_INPUT = _env_int("ROLEPLAY_ACTION_ID_INPUT", 2373)
+BOT_DISPLAY_CONFIG_ID = _env_int_optional("ROLEPLAY_BOT_DISPLAY_CONFIG_ID")
+ACTION_ID_INPUT = _env_int_optional("ROLEPLAY_ACTION_ID_INPUT")
 FLOW_ID = _env_int("ROLEPLAY_FLOW_ID", 1251)
-ACTION_ID_STREAM = _env_int("ROLEPLAY_ACTION_ID_STREAM", 2374)
+ACTION_ID_STREAM = _env_int_optional("ROLEPLAY_ACTION_ID_STREAM")
+END_TYPE = _env_int("ROLEPLAY_END_TYPE", 1)
 SCENE_DIR = os.environ.get("ROLEPLAY_SCENE_DIR", "场景1_质感自用Elena")
+ROLEPLAY_CUSTOM_CONFIG_KEY = os.environ.get("ROLEPLAY_CUSTOM_CONFIG_KEY", "nstr.bot-display.custom-config")
 
 HTTP_TIMEOUT = 30
 SSE_TIMEOUT = 180
@@ -83,6 +95,7 @@ def _check(resp, who):
 
 # ─────────────────── 接口封装 ───────────────────
 def begin():
+    _resolve_runtime_config()
     url = f"{CONFI}/welearning/api/nstr/mobile/data/begin?companyCode={COMPANY}&certificate={CERT}"
     body = {"memberId": MEMBER_ID, "baseId": BASE_ID,
             "botDisplayConfigId": BOT_DISPLAY_CONFIG_ID, "beginChar": 0, "beginType": 0}
@@ -90,6 +103,7 @@ def begin():
 
 
 def record_input(record_id, user_input, loop_index):
+    _resolve_runtime_config()
     url = f"{CONFI}/welearning/api/nstr/mobile/data/recordInput?companyCode={COMPANY}&certificate={CERT}"
     body = {"memberId": MEMBER_ID, "trainingId": BASE_ID, "recordId": record_id,
             "userInput": user_input, "loopIndex": loop_index,
@@ -98,6 +112,7 @@ def record_input(record_id, user_input, loop_index):
 
 
 def open_stream(record_id, bind_detail_id, user_input, loop_count):
+    _resolve_runtime_config()
     url = f"{AI}/ailearning/nstr/call/openStream?companyCode={COMPANY}&certificate={CERT}"
     body = {"nstrBaseId": BASE_ID, "nstrResultId": record_id, "nstrFlowId": FLOW_ID,
             "nstrActionId": ACTION_ID_STREAM, "loopCount": loop_count,
@@ -163,6 +178,83 @@ def get_prompt_trace(record_id):
     return _check(_get(url), "getRoleplayPromptTrace").get("data") or []
 
 
+def end_record(record_id):
+    url = f"{CONFI}/welearning/api/nstr/mobile/data/end?companyCode={COMPANY}&certificate={CERT}"
+    body = {"recordId": record_id, "endType": END_TYPE}
+    return _check(_post(url, body), "end")
+
+
+def random_config_query(config_key):
+    url = (f"{AI}/ailearning/nstr/tool/roleplayRandomConfig/query?baseId={BASE_ID}"
+           f"&configKey={urllib.parse.quote(config_key)}&companyCode={COMPANY}&certificate={CERT}")
+    return _check(_get(url), "roleplayRandomConfig/query").get("data")
+
+
+def random_config_update(config_key, config_value):
+    url = f"{AI}/ailearning/nstr/tool/roleplayRandomConfig/update?companyCode={COMPANY}&certificate={CERT}"
+    body = {"baseId": BASE_ID, "configKey": config_key, "configValue": config_value}
+    return _check(_post(url, body), "roleplayRandomConfig/update").get("data")
+
+
+def _resolve_runtime_config():
+    """按 baseId 从 8080 侧解析角色 id 与 loop action id，避免测试脚本沿用旧场景默认值。"""
+    global BOT_DISPLAY_CONFIG_ID, ACTION_ID_INPUT, ACTION_ID_STREAM
+    if BOT_DISPLAY_CONFIG_ID is None:
+        url = (f"{CONFI}/welearning/api/nstr/mobile/data/baseInfo?nstrBaseId={BASE_ID}"
+               f"&memberId={MEMBER_ID}&withMemberUseCount=false&companyCode={COMPANY}&certificate={CERT}")
+        data = _check(_post(url, {}), "baseInfo").get("data") or {}
+        configs = data.get("botDisplayConfigs") or []
+        if not configs:
+            raise ApiError(f"baseId={BASE_ID} 未查询到可用 botDisplayConfigs")
+        BOT_DISPLAY_CONFIG_ID = configs[0].get("id")
+    if ACTION_ID_INPUT is None or ACTION_ID_STREAM is None:
+        url = (f"{CONFI}/welearning/api/nstr/mobile/data/flows?nstrBaseId={BASE_ID}"
+               f"&companyCode={COMPANY}&certificate={CERT}")
+        flows = _check(_get(url), "flows").get("data") or []
+        for node in flows:
+            loop = node.get("loop") or {}
+            for action in loop.get("actions") or []:
+                action_type = action.get("actionType")
+                if ACTION_ID_INPUT is None and action_type == "get-input":
+                    ACTION_ID_INPUT = action.get("id")
+                if ACTION_ID_STREAM is None and action_type == "bot-answer":
+                    ACTION_ID_STREAM = action.get("id")
+        if ACTION_ID_INPUT is None or ACTION_ID_STREAM is None:
+            raise ApiError(f"baseId={BASE_ID} 未能从 flows 解析 get-input/bot-answer actionId")
+
+
+def _extract_json_blocks_from_md(path):
+    with open(path, "r", encoding="utf-8") as f:
+        text = f.read()
+    blocks = re.findall(r"```json\s*(.*?)\s*```", text, re.S)
+    if len(blocks) < 2:
+        raise ApiError("随机池文档至少需要两个 json 代码块：性格池、产品池")
+    parsed = []
+    for block in blocks[:2]:
+        data = json.loads(block)
+        if not isinstance(data, list):
+            raise ApiError("随机池 json 代码块必须是数组")
+        parsed.append(data)
+    return parsed[0], parsed[1]
+
+
+def _validate_pool_items(items, name):
+    if not isinstance(items, list) or not items:
+        raise ApiError(f"{name} 必须是非空 JSON 数组")
+    for idx, item in enumerate(items):
+        if not isinstance(item, dict):
+            raise ApiError(f"{name}[{idx}] 必须是对象")
+        missing = [k for k in ("name", "content", "enabled") if k not in item]
+        if missing:
+            raise ApiError(f"{name}[{idx}] 缺少字段: {', '.join(missing)}")
+        if not isinstance(item.get("name"), str) or not item["name"].strip():
+            raise ApiError(f"{name}[{idx}].name 必须是非空字符串")
+        if not isinstance(item.get("content"), str) or not item["content"].strip():
+            raise ApiError(f"{name}[{idx}].content 必须是非空字符串")
+        if not isinstance(item.get("enabled"), bool):
+            raise ApiError(f"{name}[{idx}].enabled 必须是布尔值")
+
+
 def _split_state(text):
     """分离模型输出里的 <?STATE>自盘点<?ENDSTATE> 与 Elena 正文。
     前端虽自兼容隐藏，但测试要把盘点单独留出来调试、把正文清干净。"""
@@ -223,7 +315,18 @@ def cmd_step(record_id, sa_text):
     serial = open_stream(record_id, bind_id, sa_text, loop)
     raw = pull_sse(serial)
     state, customer = _split_state(raw)
-    data["turns"].append({"loop": loop, "sa": sa_text, "elena": customer, "state": state})
+    has_end = END_TAG in (customer or "")
+    turn = {"loop": loop, "sa": sa_text, "elena": customer, "state": state}
+    if has_end:
+        try:
+            end_resp = end_record(record_id)
+            turn["endMarked"] = True
+            turn["endResponse"] = end_resp.get("data")
+        except Exception as e:
+            turn["endMarked"] = False
+            turn["endError"] = str(e)
+            print(f"(标记记录结束失败: {e})")
+    data["turns"].append(turn)
     if loop == 0 and not data.get("product"):
         try:
             rand = get_random(record_id)
@@ -240,8 +343,11 @@ def cmd_step(record_id, sa_text):
     if loop == 0 and data.get("product"):
         print(f"[本局性子] {data['personality']}")
         print(f"[本局产品] {data['product']}")
-    if END_TAG in (customer or ""):
-        print("⟵ AI 顾客输出了结束标签，本局自然收尾。")
+    if has_end:
+        if turn.get("endMarked"):
+            print(f"⟵ AI 顾客输出了结束标签，已调用 /data/end 标记本局结束(endType={END_TYPE})。")
+        else:
+            print("⟵ AI 顾客输出了结束标签，但标记本局结束失败。")
     return customer
 
 
@@ -257,6 +363,47 @@ def cmd_show(record_id):
         print(f"\n分析：{json.dumps(data['analysis'], ensure_ascii=False, indent=2)}")
 
 
+def cmd_run_script(path):
+    with open(path, "r", encoding="utf-8") as f:
+        items = json.load(f)
+    if not isinstance(items, list) or not all(isinstance(x, str) and x.strip() for x in items):
+        raise ApiError("run-script 需要一个非空字符串数组 JSON")
+
+    rid = cmd_begin()
+    model_ended = False
+    for sa_text in items:
+        customer = cmd_step(rid, sa_text.strip())
+        if END_TAG in (customer or ""):
+            model_ended = True
+            break
+
+    data = _load(rid)
+    last_turn = (data.get("turns") or [{}])[-1]
+    record_end_marked = bool(last_turn.get("endMarked"))
+    data["analysis"] = {
+        "script": os.path.abspath(path),
+        "modelEnded": model_ended,
+        "recordEndMarked": record_end_marked,
+        "ended": model_ended and record_end_marked,
+        "turns": len(data.get("turns") or []),
+        "baseId": BASE_ID,
+        "botDisplayConfigId": BOT_DISPLAY_CONFIG_ID,
+        "flowId": FLOW_ID,
+        "inputActionId": ACTION_ID_INPUT,
+        "streamActionId": ACTION_ID_STREAM,
+    }
+    _save(data)
+    print(f"RUN_RECORD_ID={rid}")
+    print(f"RUN_JSON={_session_path(rid)}")
+    print(f"RUN_MODEL_ENDED={str(model_ended).lower()}")
+    print(f"RUN_RECORD_END_MARKED={str(record_end_marked).lower()}")
+    print(f"RUN_ENDED={str(model_ended and record_end_marked).lower()}")
+    if not model_ended:
+        print("⚠ 脚本话术已跑完，但 AI 顾客没有输出 END_CHAT。")
+    elif not record_end_marked:
+        print("⚠ AI 顾客已输出 END_CHAT，但业务记录结束标记失败。")
+
+
 def cmd_prompt_trace(record_id):
     traces = get_prompt_trace(record_id)
     if not traces:
@@ -265,6 +412,46 @@ def cmd_prompt_trace(record_id):
     for trace in traces:
         print(f"===== loop={trace.get('loopIndex')} baseId={trace.get('baseId')} actionId={trace.get('actionId')} =====")
         print(trace.get("prompt") or "")
+
+
+def cmd_random_config_get(config_key):
+    data = random_config_query(config_key)
+    print(json.dumps(data, ensure_ascii=False, indent=2))
+
+
+def cmd_random_config_set(config_key, json_path):
+    with open(json_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    _validate_pool_items(data, "随机池配置")
+    config_value = json.dumps(data, ensure_ascii=False)
+    updated = random_config_update(config_key, config_value)
+    print(f"✓ 已更新 baseId={BASE_ID} configKey={config_key} items={len(data)}")
+    print(json.dumps(updated, ensure_ascii=False, indent=2))
+
+
+def cmd_random_config_sync(md_path, target):
+    if "ROLEPLAY_BASE_ID" not in os.environ:
+        raise ApiError("为避免误写默认 baseId=497，random-config-sync 必须显式设置 ROLEPLAY_BASE_ID")
+    personality_pool, product_pool = _extract_json_blocks_from_md(md_path)
+    _validate_pool_items(personality_pool, "性格池")
+    _validate_pool_items(product_pool, "产品池")
+    current = random_config_query(ROLEPLAY_CUSTOM_CONFIG_KEY) or {}
+    try:
+        custom_config = json.loads(current.get("configValue") or "{}")
+    except Exception as e:
+        raise ApiError(f"当前 {ROLEPLAY_CUSTOM_CONFIG_KEY} 不是合法 JSON，不能安全合并: {e}")
+    if target in ("personality", "all"):
+        custom_config["rolePlayPersonality"] = personality_pool
+    if target in ("product", "all"):
+        custom_config["rolePlayProduct"] = product_pool
+    if target not in ("personality", "product", "all"):
+        raise ApiError("target 只能是 personality、product 或 all")
+    config_value = json.dumps(custom_config, ensure_ascii=False)
+    updated = random_config_update(ROLEPLAY_CUSTOM_CONFIG_KEY, config_value)
+    print(f"✓ 已同步 baseId={BASE_ID} configKey={ROLEPLAY_CUSTOM_CONFIG_KEY} "
+          f"personality={len(custom_config.get('rolePlayPersonality') or [])} "
+          f"product={len(custom_config.get('rolePlayProduct') or [])} "
+          f"id={updated.get('id') if updated else ''}")
 
 
 def prompt_query():
@@ -308,10 +495,26 @@ def main():
             cmd_step(int(args[1]), args[2])
         elif cmd == "show":
             cmd_show(int(args[1]))
+        elif cmd == "run-script":
+            if len(args) < 2:
+                print("用法：run-script <SA话术数组.json>"); sys.exit(1)
+            cmd_run_script(args[1])
         elif cmd == "prompt-trace":
             if len(args) < 2:
                 print("用法：prompt-trace <recordId>"); sys.exit(1)
             cmd_prompt_trace(int(args[1]))
+        elif cmd == "random-config-get":
+            if len(args) < 2:
+                print("用法：random-config-get <configKey>"); sys.exit(1)
+            cmd_random_config_get(args[1])
+        elif cmd == "random-config-set":
+            if len(args) < 3:
+                print("用法：random-config-set <configKey> <json文件>"); sys.exit(1)
+            cmd_random_config_set(args[1], args[2])
+        elif cmd == "random-config-sync":
+            if len(args) < 2:
+                print("用法：random-config-sync <随机池md文件> [personality|product|all]"); sys.exit(1)
+            cmd_random_config_sync(args[1], args[2] if len(args) > 2 else "all")
         elif cmd == "prompt-get":
             d = prompt_query()
             v = d.get("templateValue", "")

@@ -20,8 +20,9 @@ import glob
 import datetime
 import difflib
 
+SCENE_DIR = os.environ.get("ROLEPLAY_SCENE_DIR", "场景1_质感自用Elena")
 OUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..",
-                       "陪练场景搭建", "场景1_质感自用Elena", "记录", "接口测试输出")
+                       "陪练场景搭建", SCENE_DIR, "记录", "接口测试输出")
 DATA_JS = os.path.join(OUT_DIR, "records.js")
 
 PERSONA_MAP = [
