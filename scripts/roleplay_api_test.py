@@ -29,6 +29,7 @@ import datetime
 import os
 import re
 import glob
+import time
 import urllib.parse
 import urllib.request
 import urllib.error
@@ -53,7 +54,7 @@ BASE_ID = _env_int("ROLEPLAY_BASE_ID", 497)
 MEMBER_ID = _env_int("ROLEPLAY_MEMBER_ID", 40147)
 BOT_DISPLAY_CONFIG_ID = _env_int_optional("ROLEPLAY_BOT_DISPLAY_CONFIG_ID")
 ACTION_ID_INPUT = _env_int_optional("ROLEPLAY_ACTION_ID_INPUT")
-FLOW_ID = _env_int("ROLEPLAY_FLOW_ID", 1251)
+FLOW_ID = _env_int_optional("ROLEPLAY_FLOW_ID")
 ACTION_ID_STREAM = _env_int_optional("ROLEPLAY_ACTION_ID_STREAM")
 END_TYPE = _env_int("ROLEPLAY_END_TYPE", 1)
 SCENE_DIR = os.environ.get("ROLEPLAY_SCENE_DIR", "场景1_质感自用Elena")
@@ -173,6 +174,43 @@ def get_random(record_id):
     return out
 
 
+def get_history(record_id):
+    url = (f"{CONFI}/welearning/api/nstr/mobile/data/history?companyCode={COMPANY}"
+           f"&certificate={CERT}&pageNo=1&pageSize=200")
+    resp = _check(_post(url, {"recordId": record_id, "memberId": MEMBER_ID}), "history")
+    data = resp.get("data") or {}
+    return data.get("records") or []
+
+
+def _find_bound_bot_answer(records, bind_detail_id):
+    matches = [
+        item for item in records
+        if item.get("actionType") == "bot-answer" and item.get("bindDetailId") == bind_detail_id
+    ]
+    return matches[-1] if matches else None
+
+
+def _recover_bot_answer_from_history(record_id, bind_detail_id):
+    """SSE may be empty when async execution stalls; history tells whether bot-answer completed."""
+    last_detail = None
+    for _ in range(3):
+        detail = _find_bound_bot_answer(get_history(record_id), bind_detail_id)
+        if detail:
+            last_detail = detail
+            content = detail.get("content") or ""
+            if content:
+                return content
+            if detail.get("actionStatus") == 2:
+                return content
+        time.sleep(2)
+    if last_detail:
+        raise ApiError(
+            f"bot-answer未完成：recordId={record_id} bindDetailId={bind_detail_id} "
+            f"detailId={last_detail.get('recordDetailId')} actionStatus={last_detail.get('actionStatus')} content为空"
+        )
+    raise ApiError(f"bot-answer未落记录：recordId={record_id} bindDetailId={bind_detail_id}")
+
+
 def get_prompt_trace(record_id):
     url = f"{AI}/ailearning/nstr/tool/getRoleplayPromptTrace?recordId={record_id}&companyCode={COMPANY}&certificate={CERT}"
     return _check(_get(url), "getRoleplayPromptTrace").get("data") or []
@@ -198,7 +236,7 @@ def random_config_update(config_key, config_value):
 
 def _resolve_runtime_config():
     """按 baseId 从 8080 侧解析角色 id 与 loop action id，避免测试脚本沿用旧场景默认值。"""
-    global BOT_DISPLAY_CONFIG_ID, ACTION_ID_INPUT, ACTION_ID_STREAM
+    global BOT_DISPLAY_CONFIG_ID, ACTION_ID_INPUT, ACTION_ID_STREAM, FLOW_ID
     if BOT_DISPLAY_CONFIG_ID is None:
         url = (f"{CONFI}/welearning/api/nstr/mobile/data/baseInfo?nstrBaseId={BASE_ID}"
                f"&memberId={MEMBER_ID}&withMemberUseCount=false&companyCode={COMPANY}&certificate={CERT}")
@@ -207,18 +245,34 @@ def _resolve_runtime_config():
         if not configs:
             raise ApiError(f"baseId={BASE_ID} 未查询到可用 botDisplayConfigs")
         BOT_DISPLAY_CONFIG_ID = configs[0].get("id")
-    if ACTION_ID_INPUT is None or ACTION_ID_STREAM is None:
+    if ACTION_ID_INPUT is None or ACTION_ID_STREAM is None or FLOW_ID is None:
         url = (f"{CONFI}/welearning/api/nstr/mobile/data/flows?nstrBaseId={BASE_ID}"
                f"&companyCode={COMPANY}&certificate={CERT}")
         flows = _check(_get(url), "flows").get("data") or []
+        selected_loop = None
         for node in flows:
             loop = node.get("loop") or {}
-            for action in loop.get("actions") or []:
+            if not loop:
+                continue
+            loop_id = loop.get("id") or node.get("targetId")
+            actions = loop.get("actions") or []
+            action_types = {action.get("actionType") for action in actions}
+            if FLOW_ID is not None and loop_id == FLOW_ID:
+                selected_loop = loop
+                break
+            if FLOW_ID is None and {"get-input", "bot-answer"}.issubset(action_types):
+                FLOW_ID = loop_id
+                selected_loop = loop
+                break
+        if selected_loop:
+            for action in selected_loop.get("actions") or []:
                 action_type = action.get("actionType")
                 if ACTION_ID_INPUT is None and action_type == "get-input":
                     ACTION_ID_INPUT = action.get("id")
                 if ACTION_ID_STREAM is None and action_type == "bot-answer":
                     ACTION_ID_STREAM = action.get("id")
+        if FLOW_ID is None:
+            raise ApiError(f"baseId={BASE_ID} 未能从 flows 解析 loop.id/nstrFlowId")
         if ACTION_ID_INPUT is None or ACTION_ID_STREAM is None:
             raise ApiError(f"baseId={BASE_ID} 未能从 flows 解析 get-input/bot-answer actionId")
 
@@ -227,14 +281,29 @@ def _extract_json_blocks_from_md(path):
     with open(path, "r", encoding="utf-8") as f:
         text = f.read()
     blocks = re.findall(r"```json\s*(.*?)\s*```", text, re.S)
-    if len(blocks) < 2:
-        raise ApiError("随机池文档至少需要两个 json 代码块：性格池、产品池")
-    parsed = []
-    for block in blocks[:2]:
-        data = json.loads(block)
-        if not isinstance(data, list):
-            raise ApiError("随机池 json 代码块必须是数组")
-        parsed.append(data)
+    if not blocks:
+        raise ApiError("随机池文档缺少 json 代码块")
+
+    parsed = [json.loads(block) for block in blocks]
+
+    # 现行格式：性格池与产品池合并在同一个 JSON 对象中。
+    for data in parsed:
+        if not isinstance(data, dict):
+            continue
+        personality_pool = data.get("rolePlayPersonality")
+        product_pool = data.get("rolePlayProduct")
+        if not isinstance(personality_pool, list) or not isinstance(product_pool, list):
+            raise ApiError(
+                "合并随机池 JSON 必须同时包含 rolePlayPersonality 和 rolePlayProduct 数组"
+            )
+        return personality_pool, product_pool
+
+    # 兼容历史文档：前两个 JSON 代码块依次为性格池、产品池数组。
+    if len(parsed) < 2 or not all(isinstance(data, list) for data in parsed[:2]):
+        raise ApiError(
+            "随机池 JSON 应为包含 rolePlayPersonality/rolePlayProduct 的对象，"
+            "或两个依次表示性格池、产品池的数组代码块"
+        )
     return parsed[0], parsed[1]
 
 
@@ -256,7 +325,7 @@ def _validate_pool_items(items, name):
 
 
 def _split_state(text):
-    """分离模型输出里的 <?STATE>自盘点<?ENDSTATE> 与 Elena 正文。
+    """分离模型输出里的 <?STATE ...> 与 Elena 正文。
     前端虽自兼容隐藏，但测试要把盘点单独留出来调试、把正文清干净。"""
     if not text:
         return "", ""
@@ -264,6 +333,14 @@ def _split_state(text):
     state = m.group(1).strip() if m else ""
     clean = re.sub(r"<\?STATE\s*.*?>", "", text, flags=re.S)
     return state, clean.strip()
+
+
+def _state_has_required_fields(state):
+    """状态标签必须各包含一次关切/动作/表态；字段缺失不能算连续性验收通过。"""
+    if not state:
+        return False
+    return all(len(re.findall(rf"(?:^|；)\s*{field}\s*=", state)) == 1
+               for field in ("关切", "动作", "表态"))
 
 
 # ─────────────────── 一局记录的持久化（按 recordId）───────────────────
@@ -314,9 +391,20 @@ def cmd_step(record_id, sa_text):
     bind_id = record_input(record_id, sa_text, loop)
     serial = open_stream(record_id, bind_id, sa_text, loop)
     raw = pull_sse(serial)
+    if not raw:
+        raw = _recover_bot_answer_from_history(record_id, bind_id)
     state, customer = _split_state(raw)
+    state_missing = not bool(state)
+    state_valid = _state_has_required_fields(state)
     has_end = END_TAG in (customer or "")
-    turn = {"loop": loop, "sa": sa_text, "elena": customer, "state": state}
+    turn = {
+        "loop": loop,
+        "sa": sa_text,
+        "elena": customer,
+        "state": state,
+        "stateMissing": state_missing,
+        "stateValid": state_valid,
+    }
     if has_end:
         try:
             end_resp = end_record(record_id)
@@ -339,6 +427,10 @@ def cmd_step(record_id, sa_text):
     print(f"[SA   ] {sa_text}")
     if state:
         print(f"[盘点 ] {state}")
+    if state_missing:
+        print("⚠ [STATE] 本轮模型未输出状态标签；该局不能判为状态连续性验收通过。")
+    elif not state_valid:
+        print("⚠ [STATE] 本轮状态标签未完整包含关切/动作/表态；该局不能判为状态连续性验收通过。")
     print(f"[顾客 ] {customer}")
     if loop == 0 and data.get("product"):
         print(f"[本局性子] {data['personality']}")
@@ -380,10 +472,15 @@ def cmd_run_script(path):
     data = _load(rid)
     last_turn = (data.get("turns") or [{}])[-1]
     record_end_marked = bool(last_turn.get("endMarked"))
+    state_complete = bool(data.get("turns")) and all(
+        turn.get("stateValid") is True
+        for turn in data.get("turns") or []
+    )
     data["analysis"] = {
         "script": os.path.abspath(path),
         "modelEnded": model_ended,
         "recordEndMarked": record_end_marked,
+        "stateComplete": state_complete,
         "ended": model_ended and record_end_marked,
         "turns": len(data.get("turns") or []),
         "baseId": BASE_ID,
@@ -397,11 +494,14 @@ def cmd_run_script(path):
     print(f"RUN_JSON={_session_path(rid)}")
     print(f"RUN_MODEL_ENDED={str(model_ended).lower()}")
     print(f"RUN_RECORD_END_MARKED={str(record_end_marked).lower()}")
+    print(f"RUN_STATE_COMPLETE={str(state_complete).lower()}")
     print(f"RUN_ENDED={str(model_ended and record_end_marked).lower()}")
     if not model_ended:
         print("⚠ 脚本话术已跑完，但 AI 顾客没有输出 END_CHAT。")
     elif not record_end_marked:
         print("⚠ AI 顾客已输出 END_CHAT，但业务记录结束标记失败。")
+    if not state_complete:
+        print("⚠ 至少一轮缺失 STATE；该局可用于观察话术，但不能判为状态连续性验收通过。")
 
 
 def cmd_prompt_trace(record_id):

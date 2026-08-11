@@ -6,7 +6,7 @@
 set -u
 cd "$(dirname "$0")/.." || exit 0   # 切到项目根（不依赖调用方 cwd）
 
-KBROOT="知识库搭建/具体KB内容"
+KBROOT="知识库搭建/kbase"
 FAIL=0
 ok(){   printf '  \033[32m✓\033[0m %s\n' "$1"; }
 warn(){ printf '  \033[33m⚠\033[0m %s\n' "$1"; }
@@ -29,15 +29,12 @@ fi
 
 # ─────────── 硬拦 2：定稿 / 单一事实源产物存在且非空 ───────────
 echo "--- [硬拦] 定稿产物存在性 ---"
-PRODUCTS="陪练场景搭建/场景1_质感自用Elena/最新使用提示词.md
-陪练场景搭建/场景2_奥莱私域轻奢Bella/最新使用提示词.md
+PRODUCTS="陪练场景搭建/场景1_质感自用Elena/正价场景-最新使用提示词.md
+陪练场景搭建/场景2_奥莱私域轻奢Bella/奥莱场景-最新使用提示词.md
 陪练场景搭建/场景1_质感自用Elena/随机机制/最新随机池内容.md
-陪练场景搭建/场景1_质感自用Elena/随机机制/角色扮演随机机制说明.md
 陪练场景搭建/场景2_奥莱私域轻奢Bella/随机机制/最新随机池内容.md
 陪练场景搭建/0_提示词写作规范.md
-知识库搭建/Coach陪练知识库架构设计_v2.md
-知识库搭建/百炼知识库部署配置与命中测试清单.md
-知识库搭建/Coach知识库文档生成Prompt模板_v1_2.md"
+知识库搭建/Coach陪练知识库架构设计_v2.md"
 miss=0
 while IFS= read -r p; do
   [ -z "$p" ] && continue
@@ -49,46 +46,162 @@ EOF
 
 # ─────────── 硬拦 3：百炼变量名契约（防 persona 回潮，6-24 事故根因）───────────
 echo "--- [硬拦] 百炼变量名契约 ---"
-CONTRACT="陪练场景搭建/场景1_质感自用Elena/最新使用提示词.md
-陪练场景搭建/场景2_奥莱私域轻奢Bella/最新使用提示词.md
-陪练场景搭建/场景1_质感自用Elena/随机机制/最新随机池内容.md
-陪练场景搭建/场景2_奥莱私域轻奢Bella/随机机制/最新随机池内容.md"
-# 正向：契约变量必须仍在（被改名则消失）
-while IFS= read -r v; do
-  [ -z "$v" ] && continue
-  found=0
-  while IFS= read -r cf; do
-    [ -z "$cf" ] && continue
-    grep -qF "$v" "$cf" 2>/dev/null && found=1
-  done <<EOF
-$CONTRACT
-EOF
-  [ "$found" = 1 ] && ok "契约变量在用：\${$v}" || bad "契约变量 \${$v} 消失（疑被改名 / 误删）"
-done <<'EOF'
-roleplay_personality
-roleplay_product
-rolePlayPersonality
-rolePlayProduct
-rolePlayState
-EOF
-# 反向：明确错误形式 ${persona} 不得出现
-badvar=0
-while IFS= read -r cf; do
-  [ -z "$cf" ] && continue
-  grep -nF '${persona}' "$cf" 2>/dev/null && badvar=1
-done <<EOF
-$CONTRACT
-EOF
-[ "$badvar" = 1 ] && bad "出现错误变量 \${persona}（应为 \${roleplay_personality}）"
+PROMPT_CONTRACTS=(
+  "陪练场景搭建/场景1_质感自用Elena/正价场景-最新使用提示词.md"
+  "陪练场景搭建/场景2_奥莱私域轻奢Bella/奥莱场景-最新使用提示词.md"
+)
+POOL_CONTRACTS=(
+  "陪练场景搭建/场景1_质感自用Elena/随机机制/最新随机池内容.md"
+  "陪练场景搭建/场景2_奥莱私域轻奢Bella/随机机制/最新随机池内容.md"
+)
+
+# 每个场景 prompt 都必须独立保有三个精确占位，不允许跨文件串证。
+for cf in "${PROMPT_CONTRACTS[@]}"; do
+  for v in rolePlayPersonality rolePlayProduct rolePlayState; do
+    token="{${v}}"
+    if grep -qF "$token" "$cf" 2>/dev/null; then
+      ok "$(basename "$cf") 契约占位在用：${token}"
+    else
+      bad "$(basename "$cf") 缺少精确契约占位 ${token}"
+    fi
+  done
+done
+
+# 每个合并随机池都必须独立保有性格池与产品池键。
+for cf in "${POOL_CONTRACTS[@]}"; do
+  for v in rolePlayPersonality rolePlayProduct; do
+    token="\"${v}\""
+    if grep -qF "$token" "$cf" 2>/dev/null; then
+      ok "$(basename "$(dirname "$cf")")/$(basename "$cf") 合并池键在用：${v}"
+    else
+      bad "${cf} 缺少合并池键 ${v}"
+    fi
+  done
+done
+
+# 每个场景的 enabled 产品必须有唯一款号，且不能依赖“待补 / 按门店实物观察”这类
+# 无视觉模型无法兑现的占位说法。disabled 卡保留问题与恢复线索，不参与该检查。
+echo "--- [硬拦] 双场景随机产品池可用性 ---"
+for ROLEPLAY_POOL in "${POOL_CONTRACTS[@]}"; do
+if python3 - "$ROLEPLAY_POOL" <<'PY'
+import json
+import re
+import sys
+
+path = sys.argv[1]
+text = open(path, encoding="utf-8").read()
+blocks = re.findall(r"```json\s*(.*?)\s*```", text, re.S)
+objects = [json.loads(block) for block in blocks]
+merged = next((item for item in objects if isinstance(item, dict) and "rolePlayProduct" in item), None)
+if merged is None or not isinstance(merged.get("rolePlayProduct"), list):
+    print("  未找到合法的 rolePlayProduct 数组")
+    raise SystemExit(1)
+
+enabled = [item for item in merged["rolePlayProduct"] if item.get("enabled") is True]
+errors = []
+expected_counts = (44, 16) if "场景1_" in path else (13, 12)
+actual_counts = (len(merged["rolePlayProduct"]), len(enabled))
+if actual_counts != expected_counts:
+    errors.append(
+        f"产品池规模漂移：总数/启用应为 {expected_counts[0]}/{expected_counts[1]}，"
+        f"实际为 {actual_counts[0]}/{actual_counts[1]}"
+    )
+seen = {}
+for item in enabled:
+    name = item.get("name", "")
+    content = item.get("content", "")
+    if re.search(r"待补|按门店实物观察", name + content):
+        errors.append(f"enabled 产品仍含无法兑现的占位说法：{name}")
+    sku_matches = re.findall(r"\[款号\s+([^\]]+)\]", content)
+    if len(sku_matches) != 1:
+        errors.append(f"enabled 产品款号数量不是 1：{name}")
+        continue
+    sku = sku_matches[0]
+    if sku in seen:
+        errors.append(f"enabled 产品重复款号 {sku}：{seen[sku]} / {name}")
+    else:
+        seen[sku] = name
+
+expected_skus = (
+    {
+        "CY920", "CY921", "CW628", "CAM91", "CT721", "CW604", "CAM98", "CAM84",
+        "CW620", "CW631", "CY201", "CP149", "CI032", "CCC12", "CAF55", "CCX04",
+    }
+    if "场景1_" in path
+    else {
+        "CI032", "CW631", "CP149", "CY919", "CW620", "CY201",
+        "CY920", "CAM98", "CCC12", "CW628", "CAM92", "CBA26",
+    }
+)
+if set(seen) != expected_skus:
+    errors.append(
+        "enabled 产品清单漂移："
+        f"缺少 {sorted(expected_skus - set(seen))}，"
+        f"多出 {sorted(set(seen) - expected_skus)}"
+    )
+
+if errors:
+    for error in errors:
+        print(f"  {error}")
+    raise SystemExit(1)
+print(f"  enabled 产品 {len(enabled)} 张，款号唯一且无待补占位")
+PY
+then
+  ok "$(basename "$(dirname "$ROLEPLAY_POOL")")/$(basename "$ROLEPLAY_POOL") 可用性通过"
+else
+  bad "${ROLEPLAY_POOL} 存在 enabled 问题卡"
+fi
+done
+
+# 双场景性格池稳定口径：仅 A / D 启用，B / C 不得启用。
+echo "--- [硬拦] 双场景随机性格池启用口径 ---"
+for ROLEPLAY_POOL in "${POOL_CONTRACTS[@]}"; do
+if python3 - "$ROLEPLAY_POOL" <<'PY'
+import json
+import re
+import sys
+
+path = sys.argv[1]
+text = open(path, encoding="utf-8").read()
+blocks = re.findall(r"```json\s*(.*?)\s*```", text, re.S)
+objects = [json.loads(block) for block in blocks]
+merged = next((item for item in objects if isinstance(item, dict) and "rolePlayPersonality" in item), None)
+if merged is None or not isinstance(merged.get("rolePlayPersonality"), list):
+    print("  未找到合法的 rolePlayPersonality 数组")
+    raise SystemExit(1)
+
+enabled = [item.get("name", "") for item in merged["rolePlayPersonality"] if item.get("enabled") is True]
+expected = {"A-价值型", "D-心动型"}
+if set(enabled) != expected:
+    print(f"  enabled 性格应为 {sorted(expected)}，实际为 {enabled}")
+    raise SystemExit(1)
+if any(name.startswith(("B-", "C-")) for name in enabled):
+    print(f"  B / C 类性格不得启用：{enabled}")
+    raise SystemExit(1)
+print(f"  enabled 性格稳定口径通过：{enabled}")
+PY
+then
+  ok "$(basename "$(dirname "$ROLEPLAY_POOL")")/$(basename "$ROLEPLAY_POOL") 性格池通过"
+else
+  bad "${ROLEPLAY_POOL} 性格池启用口径不符"
+fi
+done
+
+# 反向：明确错误的旧占位不得出现。
+for cf in "${PROMPT_CONTRACTS[@]}" "${POOL_CONTRACTS[@]}"; do
+  for token in '{persona}' '{roleplay_personality}' '{roleplay_product}' '{roleplay_state}'; do
+    grep -qF "$token" "$cf" 2>/dev/null && bad "${cf} 出现错误旧占位 ${token}"
+  done
+done
 
 # ─────────── 提醒 1：KB 各库篇数 vs v2 架构（3/11/18/5/5/4=46）───────────
 echo "--- [提醒] KB 各库篇数 ---"
-EXP="3 11 18 5 5 4"
+EXP=(3 11 18 5 5 4)
 tot=0; drift=0; i=1
-for e in $EXP; do
+for e in "${EXP[@]}"; do
   c=$(find "$KBROOT/KB$i" -type f -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
   tot=$((tot+c))
-  [ "$c" = "$e" ] || { warn "KB$i 篇数 $c ≠ 预期 $e（v2 架构若已调整，请更新本脚本 EXP）"; drift=1; }
+  [ "$c" = "$e" ] || { warn "KB$i 篇数 $c ≠ 预期 ${e}（v2 架构若已调整，请更新本脚本 EXP）"; drift=1; }
   i=$((i+1))
 done
 [ "$drift" = 0 ] && ok "KB 篇数 3/11/18/5/5/4=${tot}，对齐 v2"
