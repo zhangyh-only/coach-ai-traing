@@ -25,6 +25,15 @@ OUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..",
                        "陪练场景搭建", SCENE_DIR, "记录", "接口测试输出")
 DATA_JS = os.path.join(OUT_DIR, "records.js")
 
+
+def configure_scene(scene_dir):
+    """供测试脚本按本局 baseId 切换查看器输出目录。"""
+    global SCENE_DIR, OUT_DIR, DATA_JS
+    SCENE_DIR = scene_dir
+    OUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..",
+                           "陪练场景搭建", SCENE_DIR, "记录", "接口测试输出")
+    DATA_JS = os.path.join(OUT_DIR, "records.js")
+
 PERSONA_MAP = [
     ("D", "心动型", ["一眼就相中", "藏不住喜欢", "热络", "话偏多"]),
     ("B", "比价型", ["别家", "拿这只跟", "凭啥这个价", "凭啥这价", "比较"]),
@@ -108,8 +117,14 @@ def load_sessions():
             t["elena_narr"] = narrs
             t["manual"] = manual.get(t["loop"], [])
             t["auto"] = auto.get(t["loop"], [])
-        d["analyzed"] = bool(d.get("analysis"))
-        d["has_problem"] = ("问题" in ana.get("verdict", "")) if d["analyzed"] else (len(auto) > 0)
+        # run-script 会把执行收口元数据放在 analysis 中；仅有这些字段不代表已经人工分析。
+        # 真正的分析证据是 issues / verdict，且自动筛查不能被执行元数据静默覆盖。
+        d["analyzed"] = bool(ana.get("issues") or ana.get("verdict"))
+        d["has_problem"] = (
+            bool(ana.get("issues"))
+            or "问题" in ana.get("verdict", "")
+            or len(auto) > 0
+        )
         res.append(d)
     return res
 

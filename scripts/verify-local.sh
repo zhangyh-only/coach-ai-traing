@@ -124,8 +124,8 @@ for item in enabled:
 
 expected_skus = (
     {
-        "CY920", "CY921", "CW628", "CAM91", "CT721", "CW604", "CAM98", "CAM84",
-        "CW620", "CW631", "CY201", "CP149", "CI032", "CCC12", "CAF55", "CCX04",
+        "CY920", "CW628", "CAM91", "CT721", "CW604", "CAM98", "CAM84", "CW620",
+        "CW631", "CY201", "CP149", "CI032", "CCC12", "CCX04", "CCW92", "CZ747",
     }
     if "场景1_" in path
     else {
@@ -153,7 +153,7 @@ else
 fi
 done
 
-# 双场景性格池稳定口径：仅 A / D 启用，B / C 不得启用。
+# 双场景性格池稳定口径：正价启用 A / D，奥莱启用 C / D。
 echo "--- [硬拦] 双场景随机性格池启用口径 ---"
 for ROLEPLAY_POOL in "${POOL_CONTRACTS[@]}"; do
 if python3 - "$ROLEPLAY_POOL" <<'PY'
@@ -171,12 +171,9 @@ if merged is None or not isinstance(merged.get("rolePlayPersonality"), list):
     raise SystemExit(1)
 
 enabled = [item.get("name", "") for item in merged["rolePlayPersonality"] if item.get("enabled") is True]
-expected = {"A-价值型", "D-心动型"}
+expected = {"C-怕踩坑型", "D-心动型"} if "场景2_奥莱" in path else {"A-价值型", "D-心动型"}
 if set(enabled) != expected:
     print(f"  enabled 性格应为 {sorted(expected)}，实际为 {enabled}")
-    raise SystemExit(1)
-if any(name.startswith(("B-", "C-")) for name in enabled):
-    print(f"  B / C 类性格不得启用：{enabled}")
     raise SystemExit(1)
 print(f"  enabled 性格稳定口径通过：{enabled}")
 PY

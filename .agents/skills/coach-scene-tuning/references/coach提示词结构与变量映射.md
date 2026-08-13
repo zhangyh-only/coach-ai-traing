@@ -34,7 +34,7 @@
 | 业务侧名称 | 模板替换位 | 来源/配置 | 取值约束 |
 |---|---|---|---|
 | 本局性子/行为卡 | `{rolePlayPersonality}` | 场景对应 personality-pool | 只写"这一局怎么反应"，不重复画像、不写具体台词、不写流程脚本 |
-| 本局看上的包 | `{rolePlayProduct}` | product-pool / 动态产品选择 | 只当外观锚点和内部对应款参考；不要让顾客嘴上报型号、皮料、尺寸、价位；色名必须沿用产品卡或降到同一上位色，不能改成另一个近似营销色名 |
+| 本局看上的包 | `{rolePlayProduct}` | product-pool / 动态产品选择 | `旁白身份` 使用门店简称 + 必要颜色/主题 + `[款号]`，不灌官方长英文名；其余内容只当外观锚点和内部对应款参考，不要让顾客嘴上报型号、皮料、尺寸、价位；色名必须沿用产品卡或降到同一上位色，不能改成另一个近似营销色名 |
 | 已聊历史 | `{rolePlayState}` | 后端从历史 `<?STATE ...>` 抽取 | 内部只读账本，用来判断关切/动作/表态是否已发生；提示词必须消费但不能说出口 |
 
 - **命名面以当前后端组装代码为准**：最新口径统一 camelCase `rolePlay*`。如果旧文档里看到 `${roleplay_personality}` / `${roleplay_product}`，先当历史口径或旧 SSOT guard，别直接复制进新场景。
@@ -49,7 +49,10 @@
 
 coach 有本地业务系统，可直接调真实接口跑出最真实的 AI 顾客输出（比自扮演可信）。接口全文见 `陪练场景搭建/公共_跨场景复用/本地场景测试接口说明.md`，要点：
 
-- **两个服务**：`confiDomainUrl=http://127.0.0.1:8080`（配置/记录侧）、`aiDomainUrl=http://127.0.0.1:80`（AI 调用侧）。当前调试场景业务系统 id＝**497**。
+- **两个服务**：`confiDomainUrl=http://127.0.0.1:8080`（配置/记录侧）、`aiDomainUrl=http://127.0.0.1:80`（AI 调用侧）。当前正式场景为：场景1 Elena 正价 `baseId=528`，场景2 Bella 奥莱 `baseId=530`。`baseId=531` 仅作本轮新建的 A/B 实验组，须在实验通过后回到 `528/530` 正式验收；`497/507/508` 只作历史记录，不得用于当前验收。
+- **运行 id 不手填历史值**：`botDisplayConfigId`、`flowId`、`get-input` 与 `bot-answer` actionId 必须在每次试跑前按 baseId 从 `baseInfo` / `flows` 动态解析；`scripts/roleplay_api_test.py` 已按此方式工作。
+- **随机池更新有运行缓存**：`roleplayRandomConfig/update` 只写配置；AI 服务读取 `nstr.bot-display.custom-config` 时有最长约 2 分钟缓存。更新后立即查询配置只能证明数据库已写入，不能证明下一局已经使用新卡。至少等待缓存过期，再创建全新 record，并以 `getRoleRandomData` 或 prompt trace 中实际注入的性格/产品作为生效证据。
+- **验收以真实完整对话为准**：优先改主提示词和随机性格卡，不要求后端派生固定阶段，也不要求为场景调优重启 AI 服务。新 record 要确认实际注入了目标 prompt、性格卡和产品卡，并至少覆盖一条正常成交、一条依据不足后离店路径。模型不要求 100% 逐字一致；常见复读、倒退或过早成交不再稳定复现，且正常对话能自然结束即可。
 - **一轮完整对话的接口链**：
   1. **创建陪练记录** `POST {confiDomainUrl}/welearning/api/nstr/mobile/data/begin` → 返回 `data.id` = 本次 recordId。
   2. **SA 输入** `POST {confiDomainUrl}/welearning/api/nstr/mobile/data/recordInput`（带 `recordId`、`userInput`、递增的 `loopIndex`）→ 返回 `data.id` = 本轮 SA 输入详情 id（bindDetailId，下一步要用）。

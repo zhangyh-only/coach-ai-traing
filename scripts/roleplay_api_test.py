@@ -7,7 +7,7 @@ Coach 角色扮演链 · 本地业务接口测试工具（单步式）
 生成一句导购应答、喂进来、拿到 AI 顾客这轮的真实回复，自动追加存盘。一局跑完后
 我再对整局做分析、把判断写进记录，最终用 build_report.py 汇成 HTML 记录浏览器。
 
-链路（可用环境变量切换 baseId/actionId）：
+链路（正式正价 baseId=528、正式奥莱 baseId=530、A/B 实验 baseId=531；可用环境变量切换，actionId 自动解析）：
   begin（建记录, 拿 recordId）→ 每轮 recordInput→openStream→sse → getRoleRandomData（拿这局性子/产品）
 
 子命令：
@@ -16,7 +16,7 @@ Coach 角色扮演链 · 本地业务接口测试工具（单步式）
   run-script <json文件>           按 JSON 话术数组自动跑完整局，遇到 END_CHAT 停止
   random-config-get <configKey>   查询角色扮演随机池配置
   random-config-set <configKey> <json文件>  更新角色扮演随机池配置
-  random-config-sync <随机池md文件> [personality|product|all]  从文档同步随机池配置
+  random-config-sync <随机池md文件> [personality|product|all]  从文档同步随机池；all 同步顶层布尔开关
   show <recordId>                打印该局当前完整对话
   prompt-trace <recordId>        拉取该局每轮最终调用模型的 prompt（需 80 服务已接入 prompt trace）
   probe                          只探活 begin（排查连通/声纹）
@@ -29,6 +29,7 @@ import datetime
 import os
 import re
 import glob
+import hashlib
 import time
 import urllib.parse
 import urllib.request
@@ -48,16 +49,24 @@ def _env_int_optional(name):
 CONFI = os.environ.get("ROLEPLAY_CONFI", "http://127.0.0.1:8080")
 AI = os.environ.get("ROLEPLAY_AI", "http://127.0.0.1:80")
 COMPANY = os.environ.get("ROLEPLAY_COMPANY", "ruixue_dev")
-CERT = os.environ.get("ROLEPLAY_CERT", "sinoStrong")
+CERT = os.environ.get("ROLEPLAY_CERT", "fansCertificate")
 
-BASE_ID = _env_int("ROLEPLAY_BASE_ID", 497)
+BASE_ID = _env_int("ROLEPLAY_BASE_ID", 528)
 MEMBER_ID = _env_int("ROLEPLAY_MEMBER_ID", 40147)
 BOT_DISPLAY_CONFIG_ID = _env_int_optional("ROLEPLAY_BOT_DISPLAY_CONFIG_ID")
 ACTION_ID_INPUT = _env_int_optional("ROLEPLAY_ACTION_ID_INPUT")
 FLOW_ID = _env_int_optional("ROLEPLAY_FLOW_ID")
 ACTION_ID_STREAM = _env_int_optional("ROLEPLAY_ACTION_ID_STREAM")
 END_TYPE = _env_int("ROLEPLAY_END_TYPE", 1)
-SCENE_DIR = os.environ.get("ROLEPLAY_SCENE_DIR", "场景1_质感自用Elena")
+CURRENT_SCENE_DIRS = {
+    528: "场景1_质感自用Elena",
+    530: "场景2_奥莱私域轻奢Bella",
+    531: "场景1_质感自用Elena",
+}
+SCENE_DIR = os.environ.get(
+    "ROLEPLAY_SCENE_DIR",
+    CURRENT_SCENE_DIRS.get(BASE_ID, "场景1_质感自用Elena"),
+)
 ROLEPLAY_CUSTOM_CONFIG_KEY = os.environ.get("ROLEPLAY_CUSTOM_CONFIG_KEY", "nstr.bot-display.custom-config")
 
 HTTP_TIMEOUT = 30
@@ -296,7 +305,7 @@ def _extract_json_blocks_from_md(path):
             raise ApiError(
                 "合并随机池 JSON 必须同时包含 rolePlayPersonality 和 rolePlayProduct 数组"
             )
-        return personality_pool, product_pool
+        return data, personality_pool, product_pool
 
     # 兼容历史文档：前两个 JSON 代码块依次为性格池、产品池数组。
     if len(parsed) < 2 or not all(isinstance(data, list) for data in parsed[:2]):
@@ -304,7 +313,7 @@ def _extract_json_blocks_from_md(path):
             "随机池 JSON 应为包含 rolePlayPersonality/rolePlayProduct 的对象，"
             "或两个依次表示性格池、产品池的数组代码块"
         )
-    return parsed[0], parsed[1]
+    return {}, parsed[0], parsed[1]
 
 
 def _validate_pool_items(items, name):
@@ -358,6 +367,7 @@ def _refresh_viewer():
     try:
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
         import build_report
+        build_report.configure_scene(SCENE_DIR)
         build_report.build()
     except Exception as e:
         print(f"(刷新 records.js 失败，可手动跑 python3 scripts/build_report.py：{e})")
@@ -373,8 +383,23 @@ def _save(data):
 # ─────────────────── 子命令 ───────────────────
 def cmd_begin():
     rid = begin()
+    runtime_config = {
+        "baseId": BASE_ID,
+        "botDisplayConfigId": BOT_DISPLAY_CONFIG_ID,
+        "flowId": FLOW_ID,
+        "inputActionId": ACTION_ID_INPUT,
+        "streamActionId": ACTION_ID_STREAM,
+    }
+    try:
+        prompt_data = prompt_query()
+        prompt_text = (prompt_data.get("templateValue") or "").strip()
+        runtime_config["promptSha256"] = hashlib.sha256(prompt_text.encode("utf-8")).hexdigest()
+        runtime_config["promptUpdateTime"] = prompt_data.get("updateTime")
+    except Exception as e:
+        print(f"(读取 prompt 版本证据失败，不阻塞建局: {e})")
     data = {"recordId": rid,
             "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "runtimeConfig": runtime_config,
             "personality": "", "product": "", "turns": [], "analysis": None}
     _save(data)
     print(f"RECORD_ID={rid}")
@@ -507,7 +532,8 @@ def cmd_run_script(path):
 def cmd_prompt_trace(record_id):
     traces = get_prompt_trace(record_id)
     if not traces:
-        print("暂无 prompt trace。请确认 80 服务已重启到包含 trace 的版本，并至少跑过一轮 bot-answer。")
+        print("暂无 prompt trace。可先用 prompt-get 回读线上内容，并核对会话 runtimeConfig 中的 "
+              "promptSha256 / promptUpdateTime；trace 能力未接入时另行排查，不要求为场景调优重启服务。")
         return
     for trace in traces:
         print(f"===== loop={trace.get('loopIndex')} baseId={trace.get('baseId')} actionId={trace.get('actionId')} =====")
@@ -531,8 +557,8 @@ def cmd_random_config_set(config_key, json_path):
 
 def cmd_random_config_sync(md_path, target):
     if "ROLEPLAY_BASE_ID" not in os.environ:
-        raise ApiError("为避免误写默认 baseId=497，random-config-sync 必须显式设置 ROLEPLAY_BASE_ID")
-    personality_pool, product_pool = _extract_json_blocks_from_md(md_path)
+        raise ApiError("为避免误写默认场景，random-config-sync 必须显式设置 ROLEPLAY_BASE_ID（正价=528，奥莱=530，实验=531）")
+    source_config, personality_pool, product_pool = _extract_json_blocks_from_md(md_path)
     _validate_pool_items(personality_pool, "性格池")
     _validate_pool_items(product_pool, "产品池")
     current = random_config_query(ROLEPLAY_CUSTOM_CONFIG_KEY) or {}
@@ -544,14 +570,38 @@ def cmd_random_config_sync(md_path, target):
         custom_config["rolePlayPersonality"] = personality_pool
     if target in ("product", "all"):
         custom_config["rolePlayProduct"] = product_pool
+    if target == "all":
+        for key in ("openThinking", "replaceHistoryState"):
+            if key in source_config:
+                if not isinstance(source_config[key], bool):
+                    raise ApiError(f"随机池文档 {key} 必须是布尔值")
+                custom_config[key] = source_config[key]
     if target not in ("personality", "product", "all"):
         raise ApiError("target 只能是 personality、product 或 all")
     config_value = json.dumps(custom_config, ensure_ascii=False)
     updated = random_config_update(ROLEPLAY_CUSTOM_CONFIG_KEY, config_value)
+    readback = random_config_query(ROLEPLAY_CUSTOM_CONFIG_KEY) or {}
+    try:
+        persisted_config = json.loads(readback.get("configValue") or "{}")
+    except Exception as e:
+        raise ApiError(f"同步后回读的 {ROLEPLAY_CUSTOM_CONFIG_KEY} 不是合法 JSON: {e}")
+    verify_keys = []
+    if target in ("personality", "all"):
+        verify_keys.append("rolePlayPersonality")
+    if target in ("product", "all"):
+        verify_keys.append("rolePlayProduct")
+    if target == "all":
+        verify_keys.extend(key for key in ("openThinking", "replaceHistoryState") if key in source_config)
+    mismatched = [key for key in verify_keys if persisted_config.get(key) != custom_config.get(key)]
+    if mismatched:
+        raise ApiError(f"同步接口已返回，但立即回读不一致: {', '.join(mismatched)}")
     print(f"✓ 已同步 baseId={BASE_ID} configKey={ROLEPLAY_CUSTOM_CONFIG_KEY} "
           f"personality={len(custom_config.get('rolePlayPersonality') or [])} "
           f"product={len(custom_config.get('rolePlayProduct') or [])} "
           f"id={updated.get('id') if updated else ''}")
+    print(f"✓ 已回读校验: {', '.join(verify_keys)}")
+    print("⚠ AI 运行侧对此配置有最长约 2 分钟缓存；等待缓存过期后新建 record，"
+          "并以 getRoleRandomData / prompt trace 的实际注入内容确认生效。")
 
 
 def prompt_query():
